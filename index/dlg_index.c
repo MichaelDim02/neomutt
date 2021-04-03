@@ -1361,7 +1361,6 @@ struct Mailbox *mutt_index_menu(struct MuttWindow *dlg, struct Mailbox *m_init)
 
     if (priv->in_pager)
     {
-      mutt_clear_pager_position();
       priv->in_pager = false;
       menu_queue_redraw(priv->menu, MENU_REDRAW_FULL);
     }

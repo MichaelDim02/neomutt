@@ -181,6 +181,4 @@ void mutt_buffer_strip_formatting(struct Buffer *dest, const char *src, bool str
 struct MuttWindow *ppanel_new(bool status_on_top, struct IndexSharedData *shared);
 struct MuttWindow *pager_window_new(struct MuttWindow *parent, struct IndexSharedData *shared, struct PagerPrivateData *priv);
 
-void mutt_clear_pager_position(void);
-
 #endif /* MUTT_PAGER_LIB_H */

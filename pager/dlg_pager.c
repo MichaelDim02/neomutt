@@ -155,10 +155,6 @@ struct Resize
   bool search_back;
 };
 
-/* hack to return to position when returning from index to same message */
-static int TopLine = 0;
-static struct Email *OldEmail = NULL;
-
 static int braille_row = -1;
 static int braille_col = -1;
 
@@ -1983,15 +1979,6 @@ static int up_n_lines(int nlines, struct Line *info, int cur, bool hiding)
 }
 
 /**
- * mutt_clear_pager_position - Reset the pager's viewing position
- */
-void mutt_clear_pager_position(void)
-{
-  TopLine = 0;
-  OldEmail = NULL;
-}
-
-/**
  * pager_custom_redraw - Redraw the pager window - Implements Menu::custom_redraw()
  */
 static void pager_custom_redraw(struct Menu *pager_menu)
@@ -2430,22 +2417,6 @@ int mutt_pager(struct PagerView *pview)
   pager_menu = pview->win_pager->wdata;
   pager_menu->custom_redraw = pager_custom_redraw;
   priv->menu = pager_menu;
-
-  //---------- restore global state if needed ---------------------------------
-  while ((pview->mode == PAGER_MODE_EMAIL) && (OldEmail == pview->pdata->email) && // are we "resuming" to the same Email?
-         (TopLine != priv->topline) && // is saved offset different?
-         (priv->line_info[priv->curline].offset < (priv->sb.st_size - 1)))
-  {
-    menu_queue_redraw(pager_menu, MENU_REDRAW_FULL);
-    pager_custom_redraw(pager_menu);
-    // trick user, as if nothing happened
-    // scroll down to previosly saved offset
-    priv->topline =
-        ((TopLine - priv->topline) > priv->lines) ? priv->topline + priv->lines : TopLine;
-  }
-
-  TopLine = 0;
-  OldEmail = NULL;
 
   //---------- show windows, set focus and visibility --------------------------
   if (priv->pview->win_index)
@@ -4003,7 +3974,66 @@ int mutt_pager(struct PagerView *pview)
 
         //=======================================================================
 
+      // Missing generic functions. Not sure if they should be be here.
+      // Maybe it should be covered by default case.
+      case OP_JUMP:
+      case OP_NEXT_ENTRY:
+      case OP_PREV_ENTRY:
+        mutt_message(_("Operation is not available in pager"));
+        break;
+
+      // Operations that pager delegates to index
+      case OP_DISPLAY_HEADERS:
+      case OP_EDIT_OR_VIEW_RAW_MESSAGE:
+      case OP_EDIT_RAW_MESSAGE:
+      case OP_EDIT_TYPE:
+      case OP_MAIN_BREAK_THREAD:
+      case OP_MAIN_CHANGE_FOLDER:
+      case OP_MAIN_CHANGE_FOLDER_READONLY:
+      case OP_MAIN_CHANGE_GROUP:
+      case OP_MAIN_CHANGE_GROUP_READONLY:
+#ifdef USE_NOTMUCH
+      case OP_MAIN_CHANGE_VFOLDER:
+      case OP_MAIN_ENTIRE_THREAD:
+      case OP_MAIN_VFOLDER_FROM_QUERY:
+      case OP_MAIN_VFOLDER_FROM_QUERY_READONLY:
+#endif
+      case OP_MAIN_IMAP_FETCH:
+      case OP_MAIN_IMAP_LOGOUT_ALL:
+      case OP_MAIN_LINK_THREADS:
+      case OP_MAIN_MODIFY_TAGS:
+      case OP_MAIN_MODIFY_TAGS_THEN_HIDE:
+      case OP_MAIN_NEXT_NEW:
+      case OP_MAIN_NEXT_NEW_THEN_UNREAD:
+      case OP_MAIN_NEXT_SUBTHREAD:
+      case OP_MAIN_NEXT_THREAD:
+      case OP_MAIN_NEXT_UNDELETED:
+      case OP_MAIN_NEXT_UNREAD:
+      case OP_MAIN_NEXT_UNREAD_MAILBOX:
+      case OP_MAIN_PARENT_MESSAGE:
+      case OP_MAIN_PREV_NEW:
+      case OP_MAIN_PREV_NEW_THEN_UNREAD:
+      case OP_MAIN_PREV_SUBTHREAD:
+      case OP_MAIN_PREV_THREAD:
+      case OP_MAIN_PREV_UNDELETED:
+      case OP_MAIN_PREV_UNREAD:
+      case OP_MAIN_QUASI_DELETE:
+      case OP_MAIN_READ_SUBTHREAD:
+      case OP_MAIN_READ_THREAD:
+      case OP_MAIN_ROOT_MESSAGE:
+      case OP_MAIN_SYNC_FOLDER:
+      case OP_RECONSTRUCT_THREAD:
+      case OP_TOGGLE_WRITE:
+      case OP_VIEW_RAW_MESSAGE:
+        mutt_message(_("Operation is not available in pager"));
+        break;
+
 #ifdef USE_SIDEBAR
+
+      case OP_SIDEBAR_OPEN:
+        mutt_message(_("Operation is not available in pager"));
+        break;
+
       case OP_SIDEBAR_FIRST:
       case OP_SIDEBAR_LAST:
       case OP_SIDEBAR_NEXT:
@@ -4031,7 +4061,7 @@ int mutt_pager(struct PagerView *pview)
 #endif
 
       default:
-        op = -1;
+        mutt_message(_("Unknown operation"));
         break;
     }
   }
@@ -4048,17 +4078,6 @@ int mutt_pager(struct PagerView *pview)
   {
     pview->pdata->ctx->msg_in_pager = -1;
     priv->win_pbar->actions |= WA_RECALC;
-    switch (rc)
-    {
-      case -1:
-      case OP_DISPLAY_HEADERS:
-        mutt_clear_pager_position();
-        break;
-      default:
-        TopLine = priv->topline;
-        OldEmail = pview->pdata->email;
-        break;
-    }
   }
 
   cleanup_quote(&priv->quote_list);
