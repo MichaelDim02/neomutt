@@ -2939,6 +2939,98 @@ static enum IndexRetval op_sidebar_toggle_visible(struct IndexSharedData *shared
 // -----------------------------------------------------------------------------
 
 /**
+ * prereq - Check the pre-requisites for a function
+ * @param ctx    Mailbox
+ * @param menu   Current Menu
+ * @param checks Checks to perform, see #CheckFlags
+ * @retval true The checks pass successfully
+ */
+bool prereq(struct Context *ctx, struct Menu *menu, CheckFlags checks)
+{
+  bool result = true;
+
+  if (checks & (CHECK_MSGCOUNT | CHECK_VISIBLE | CHECK_READONLY))
+    checks |= CHECK_IN_MAILBOX;
+
+  if ((checks & CHECK_IN_MAILBOX) && (!ctx || !ctx->mailbox))
+  {
+    mutt_error(_("No mailbox is open"));
+    result = false;
+  }
+
+  if (result && (checks & CHECK_MSGCOUNT) && (ctx->mailbox->msg_count == 0))
+  {
+    mutt_error(_("There are no messages"));
+    result = false;
+  }
+
+  int index = menu_get_index(menu);
+  if (result && (checks & CHECK_VISIBLE) && (index >= ctx->mailbox->vcount))
+  {
+    mutt_error(_("No visible messages"));
+    result = false;
+  }
+
+  if (result && (checks & CHECK_READONLY) && ctx->mailbox->readonly)
+  {
+    mutt_error(_("Mailbox is read-only"));
+    result = false;
+  }
+
+  if (result && (checks & CHECK_ATTACH) && OptAttachMsg)
+  {
+    mutt_error(_("Function not permitted in attach-message mode"));
+    result = false;
+  }
+
+  if (!result)
+    mutt_flushinp();
+
+  return result;
+}
+
+/**
+ * index_function_dispatcher - Perform an Index function
+ * @param win_index Window for the Index
+ * @param op        Operation to perform, e.g. OP_MAIN_LIMIT
+ * @retval true Value function
+ */
+bool index_function_dispatcher(struct MuttWindow *win_index, int op)
+{
+  if (!win_index)
+    return false;
+
+  struct IndexPrivateData *priv = win_index->parent->wdata;
+  if (!priv)
+    return false;
+
+  struct MuttWindow *dlg = dialog_find(win_index);
+  if (!dlg || !dlg->wdata)
+    return false;
+
+  struct IndexSharedData *shared = dlg->wdata;
+
+  // int rc;
+  for (size_t i = 0; IndexFunctions[i].op != OP_NULL; i++)
+  {
+    const struct IndexFunction *fn = &IndexFunctions[i];
+    if (fn->op == op)
+    {
+      if (!prereq(shared->ctx, priv->menu, fn->flags))
+      {
+        // rc = -3;
+        break;
+      }
+      // rc =
+      IndexFunctions[i].function(shared, priv, op);
+      break;
+    }
+  }
+
+  return true;
+}
+
+/**
  * IndexFunctions - All the NeoMutt functions that the Index supports
  */
 struct IndexFunction IndexFunctions[] = {

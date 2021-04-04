@@ -45,6 +45,7 @@
 #include <stdio.h>
 #include "mutt/lib.h"
 #include "core/lib.h"
+#include "mx.h"          // IWYU pragma: keep
 #include "shared_data.h" // IWYU pragma: keep
 
 struct Context;
