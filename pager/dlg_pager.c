@@ -56,8 +56,6 @@
 #include "send/lib.h"
 #include "commands.h"
 #include "context.h"
-#include "format_flags.h"
-#include "hdrline.h"
 #include "hook.h"
 #include "keymap.h"
 #include "mutt_attach.h"
@@ -2027,7 +2025,6 @@ static void pager_custom_redraw(struct PagerPrivateData *priv)
   //---------------------------------------------------------------------------
 
   char buf[1024] = { 0 };
-  struct IndexSharedData *shared = dialog_find(priv->pview->win_pager)->wdata;
   struct Mailbox *m = priv->pview->pdata->ctx ? priv->pview->pdata->ctx->mailbox : NULL;
 
   const bool c_tilde = cs_subset_bool(NeoMutt->sub, "tilde");
@@ -2091,7 +2088,7 @@ static void pager_custom_redraw(struct PagerPrivateData *priv)
       menu_redraw_index(priv->menu);
     }
 
-    pager_queue_redraw(priv, MENU_REDRAW_BODY | MENU_REDRAW_FULL | MENU_REDRAW_STATUS);
+    pager_queue_redraw(priv, MENU_REDRAW_BODY | MENU_REDRAW_FULL);
   }
 
   if (priv->redraw & MENU_REDRAW_FLOW)
@@ -2174,75 +2171,6 @@ static void pager_custom_redraw(struct PagerPrivateData *priv)
       mutt_window_move(priv->pview->win_pager, 0, priv->lines);
     }
     mutt_curses_set_color(MT_COLOR_NORMAL);
-
-    /* We are going to update the pager status bar, so it isn't
-     * necessary to reset to normal color now. */
-
-    pager_queue_redraw(priv, MENU_REDRAW_STATUS); /* need to update the % seen */
-  }
-
-  if (priv->redraw & MENU_REDRAW_STATUS)
-  {
-    char pager_progress_str[65]; /* Lots of space for translations */
-
-    if (priv->last_pos < priv->sb.st_size - 1)
-    {
-      snprintf(pager_progress_str, sizeof(pager_progress_str), OFF_T_FMT "%%",
-               (100 * priv->last_offset / priv->sb.st_size));
-    }
-    else
-    {
-      const char *msg = (priv->topline == 0) ?
-                            /* L10N: Status bar message: the entire email is visible in the pager */
-                            _("all") :
-                            /* L10N: Status bar message: the end of the email is visible in the pager */
-                            _("end");
-      mutt_str_copy(pager_progress_str, msg, sizeof(pager_progress_str));
-    }
-
-    /* print out the pager status bar */
-    mutt_window_move(priv->pview->win_pbar, 0, 0);
-    mutt_curses_set_color(MT_COLOR_STATUS);
-
-    if (priv->pview->mode == PAGER_MODE_EMAIL || priv->pview->mode == PAGER_MODE_ATTACH_E)
-    {
-      const size_t l1 = priv->pview->win_pbar->state.cols * MB_LEN_MAX;
-      const size_t l2 = sizeof(buf);
-      const size_t buflen = (l1 < l2) ? l1 : l2;
-      struct Email *e = (priv->pview->mode == PAGER_MODE_EMAIL) ?
-                            priv->pview->pdata->email :      // PAGER_MODE_EMAIL
-                            priv->pview->pdata->body->email; // PAGER_MODE_ATTACH_E
-
-      const char *const c_pager_format =
-          cs_subset_string(NeoMutt->sub, "pager_format");
-      mutt_make_string(buf, buflen, priv->pview->win_pbar->state.cols,
-                       NONULL(c_pager_format), m, priv->pview->pdata->ctx->msg_in_pager,
-                       e, MUTT_FORMAT_NO_FLAGS, pager_progress_str);
-      mutt_draw_statusline(priv->pview->win_pbar,
-                           priv->pview->win_pbar->state.cols, buf, l2);
-    }
-    else
-    {
-      char bn[256];
-      snprintf(bn, sizeof(bn), "%s (%s)", priv->pview->banner, pager_progress_str);
-      mutt_draw_statusline(priv->pview->win_pbar,
-                           priv->pview->win_pbar->state.cols, bn, sizeof(bn));
-    }
-    mutt_curses_set_color(MT_COLOR_NORMAL);
-    const bool c_ts_enabled = cs_subset_bool(NeoMutt->sub, "ts_enabled");
-    if (c_ts_enabled && TsSupported && priv->menu)
-    {
-      const char *const c_ts_status_format =
-          cs_subset_string(NeoMutt->sub, "ts_status_format");
-      menu_status_line(buf, sizeof(buf), shared, priv->menu, sizeof(buf),
-                       NONULL(c_ts_status_format));
-      mutt_ts_status(buf);
-      const char *const c_ts_icon_format =
-          cs_subset_string(NeoMutt->sub, "ts_icon_format");
-      menu_status_line(buf, sizeof(buf), shared, priv->menu, sizeof(buf),
-                       NONULL(c_ts_icon_format));
-      mutt_ts_icon(buf);
-    }
   }
 
   priv->redraw = MENU_REDRAW_NO_FLAGS;
@@ -3415,7 +3343,7 @@ int mutt_pager(struct PagerView *pview)
             cs_subset_bool(NeoMutt->sub, "delete_untag");
         if (c_delete_untag)
           mutt_set_flag(m, pview->pdata->email, MUTT_TAG, false);
-        pager_queue_redraw(priv, MENU_REDRAW_STATUS | MENU_REDRAW_FULL);
+        pager_queue_redraw(priv, MENU_REDRAW_FULL);
         const bool c_resolve = cs_subset_bool(NeoMutt->sub, "resolve");
         if (c_resolve)
         {
@@ -3439,7 +3367,7 @@ int mutt_pager(struct PagerView *pview)
         emaillist_add_email(&el, pview->pdata->email);
 
         if (mutt_change_flag(m, &el, (op == OP_MAIN_SET_FLAG)) == 0)
-          pager_queue_redraw(priv, MENU_REDRAW_STATUS | MENU_REDRAW_FULL);
+          pager_queue_redraw(priv, MENU_REDRAW_FULL);
         const bool c_resolve = cs_subset_bool(NeoMutt->sub, "resolve");
         if (pview->pdata->email->deleted && c_resolve)
         {
@@ -3495,7 +3423,7 @@ int mutt_pager(struct PagerView *pview)
             (cs_subset_number(NeoMutt->sub, "pager_index_lines") != 0))
           pager_queue_redraw(priv, MENU_REDRAW_FULL);
         else
-          pager_queue_redraw(priv, MENU_REDRAW_STATUS | MENU_REDRAW_FULL);
+          pager_queue_redraw(priv, MENU_REDRAW_FULL);
 
         break;
       }
@@ -3551,7 +3479,7 @@ int mutt_pager(struct PagerView *pview)
           break;
 
         mutt_set_flag(m, pview->pdata->email, MUTT_FLAG, !pview->pdata->email->flagged);
-        pager_queue_redraw(priv, MENU_REDRAW_STATUS | MENU_REDRAW_FULL);
+        pager_queue_redraw(priv, MENU_REDRAW_FULL);
         const bool c_resolve = cs_subset_bool(NeoMutt->sub, "resolve");
         if (c_resolve)
         {
@@ -3867,7 +3795,7 @@ int mutt_pager(struct PagerView *pview)
             rc = OP_MAIN_NEXT_UNDELETED;
           }
           else
-            pager_queue_redraw(priv, MENU_REDRAW_STATUS | MENU_REDRAW_FULL);
+            pager_queue_redraw(priv, MENU_REDRAW_FULL);
         }
         emaillist_clear(&el);
         break;
@@ -3890,7 +3818,7 @@ int mutt_pager(struct PagerView *pview)
           break;
         mutt_set_flag(m, pview->pdata->email, MUTT_TAG, !pview->pdata->email->tagged);
 
-        pager_queue_redraw(priv, MENU_REDRAW_STATUS | MENU_REDRAW_FULL);
+        pager_queue_redraw(priv, MENU_REDRAW_FULL);
         const bool c_resolve = cs_subset_bool(NeoMutt->sub, "resolve");
         if (c_resolve)
         {
@@ -3920,7 +3848,7 @@ int mutt_pager(struct PagerView *pview)
         first = false;
         pview->pdata->ctx->msg_in_pager = -1;
         priv->win_pbar->actions |= WA_RECALC;
-        pager_queue_redraw(priv, MENU_REDRAW_STATUS | MENU_REDRAW_FULL);
+        pager_queue_redraw(priv, MENU_REDRAW_FULL);
         const bool c_resolve = cs_subset_bool(NeoMutt->sub, "resolve");
         if (c_resolve)
         {
@@ -3946,7 +3874,7 @@ int mutt_pager(struct PagerView *pview)
 
         mutt_set_flag(m, pview->pdata->email, MUTT_DELETE, false);
         mutt_set_flag(m, pview->pdata->email, MUTT_PURGE, false);
-        pager_queue_redraw(priv, MENU_REDRAW_STATUS | MENU_REDRAW_FULL);
+        pager_queue_redraw(priv, MENU_REDRAW_FULL);
         const bool c_resolve = cs_subset_bool(NeoMutt->sub, "resolve");
         if (c_resolve)
         {
@@ -3996,7 +3924,7 @@ int mutt_pager(struct PagerView *pview)
             pager_queue_redraw(priv, MENU_REDRAW_FULL);
           }
           else
-            pager_queue_redraw(priv, MENU_REDRAW_STATUS | MENU_REDRAW_FULL);
+            pager_queue_redraw(priv, MENU_REDRAW_FULL);
         }
         break;
       }

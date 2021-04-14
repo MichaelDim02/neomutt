@@ -53,7 +53,6 @@ typedef uint8_t MenuRedrawFlags;       ///< Flags, e.g. #MENU_REDRAW_CURRENT
 #define MENU_REDRAW_OLD_CUR   (1 << 2) ///< Redraw the previous selection
 #define MENU_REDRAW_FULL      (1 << 3) ///< Redraw the entire Menu
 
-#define MENU_REDRAW_STATUS    (1 << 4) ///< Redraw the status bar
 #define MENU_REDRAW_BODY      (1 << 5) ///< Redraw the pager
 #define MENU_REDRAW_FLOW      (1 << 6) ///< Used by pager to reflow text
 
@@ -62,7 +61,6 @@ typedef uint8_t MenuRedrawFlags;       ///< Flags, e.g. #MENU_REDRAW_CURRENT
  */
 struct Menu
 {
-  const char *title;      ///< Title of this menu
   int current;            ///< Current entry
   int max;                ///< Number of entries in the menu
   MenuRedrawFlags redraw; ///< When to redraw the screen
@@ -70,7 +68,6 @@ struct Menu
   int pagelen;            ///< Number of entries per screen
   bool tagprefix : 1;
   struct MuttWindow *win_index;
-  struct MuttWindow *win_ibar;
   struct ConfigSubset *sub; ///< Inherited config items
 
   /* Setting a non-empty dialog overrides normal menu behavior.
@@ -170,7 +167,6 @@ void         menu_redraw_current(struct Menu *menu);
 void         menu_redraw_full   (struct Menu *menu);
 void         menu_redraw_index  (struct Menu *menu);
 void         menu_redraw_motion (struct Menu *menu);
-void         menu_redraw_status (struct Menu *menu);
 int          menu_redraw        (struct Menu *menu);
 
 void         menu_add_dialog_row(struct Menu *menu, const char *row);
