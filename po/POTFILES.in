@@ -251,6 +251,7 @@ notmuch/tag.c
 opcodes.c
 opcodes.h
 pager/config.c
+pager/functions.c
 pager/dlg_pager.c
 pager/do_pager.c
 pager/pager.c

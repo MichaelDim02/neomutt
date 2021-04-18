@@ -56,6 +56,7 @@
 #include "send/lib.h"
 #include "commands.h"
 #include "context.h"
+#include "functions.h"
 #include "hook.h"
 #include "keymap.h"
 #include "mutt_attach.h"
