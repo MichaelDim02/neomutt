@@ -37,6 +37,8 @@
 #include "gui/lib.h"
 #include "lib.h"
 #include "index/lib.h"
+#include "menu/lib.h"
+#include "context.h"
 #include "protos.h"
 
 /**
@@ -99,6 +101,10 @@ int mutt_do_pager(struct PagerView *pview)
                       MUTT_WIN_SIZE_UNLIMITED, MUTT_WIN_SIZE_UNLIMITED);
 
   struct IndexSharedData *shared = index_shared_data_new();
+  shared->ctx = pview->pdata->ctx;
+  shared->mailbox = shared->ctx ? shared->ctx->mailbox : NULL;
+  shared->account = shared->mailbox ? shared->mailbox->account : NULL;
+  shared->email = pview->pdata->email;
   notify_set_parent(shared->notify, dlg->notify);
 
   dlg->wdata = shared;
