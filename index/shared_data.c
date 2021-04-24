@@ -141,6 +141,8 @@ static int index_shared_email_observer(struct NotifyCallback *nc)
       struct IndexSharedData old_shared = *shared;
       shared->email = NULL;
 
+      notify_observer_remove(shared->email->notify, index_shared_email_observer, shared);
+
       // Relay the message
       mutt_debug(LL_NOTIFY, "NT_INDEX_EMAIL: %p\n", shared->email);
       notify_send(shared->notify, NT_INDEX, NT_INDEX_EMAIL, &old_shared);
@@ -225,8 +227,19 @@ void index_shared_data_set_email(struct IndexSharedData *shared, struct Email *e
     shared->email = e;
     shared->email_seq = seq;
 
+    if (old_shared.email)
+    {
+      notify_observer_remove(old_shared.email->notify, index_shared_email_observer, shared);
+    }
+
     mutt_debug(LL_NOTIFY, "NT_INDEX_EMAIL: %p\n", shared->email);
     notify_send(shared->notify, NT_INDEX, NT_INDEX_EMAIL, &old_shared);
+
+    if (shared->email)
+    {
+      notify_observer_add(shared->email->notify, NT_EMAIL,
+                          index_shared_email_observer, shared);
+    }
   }
 }
 
@@ -267,7 +280,10 @@ void index_shared_data_free(struct MuttWindow *win, void **ptr)
   notify_observer_remove(NeoMutt->notify, index_shared_context_observer, shared);
   notify_observer_remove(NeoMutt->notify, index_shared_account_observer, shared);
   notify_observer_remove(NeoMutt->notify, index_shared_mailbox_observer, shared);
-  notify_observer_remove(NeoMutt->notify, index_shared_email_observer, shared);
+  if (shared->email)
+  {
+    notify_observer_remove(shared->email->notify, index_shared_email_observer, shared);
+  }
 
   FREE(ptr);
 }
@@ -286,7 +302,6 @@ struct IndexSharedData *index_shared_data_new(void)
   notify_observer_add(NeoMutt->notify, NT_CONTEXT, index_shared_context_observer, shared);
   notify_observer_add(NeoMutt->notify, NT_ACCOUNT, index_shared_account_observer, shared);
   notify_observer_add(NeoMutt->notify, NT_MAILBOX, index_shared_mailbox_observer, shared);
-  notify_observer_add(NeoMutt->notify, NT_EMAIL, index_shared_email_observer, shared);
 
   return shared;
 }
