@@ -425,6 +425,7 @@ static enum CommandResult parse_unattach_list(struct Buffer *buf, struct Buffer 
       {
         mutt_debug(LL_DEBUG3, "removed %s/%s [%d]\n", a->major, a->minor, a->major_int);
         mutt_debug(LL_NOTIFY, "NT_ATTACH_DELETE: %s/%s\n", a->major, a->minor);
+        notify_send(AttachmentsNotify, NT_ATTACH, NT_ATTACH_DELETE, NULL);
 
         regfree(&a->minor_regex);
         FREE(&a->major);
@@ -437,8 +438,6 @@ static enum CommandResult parse_unattach_list(struct Buffer *buf, struct Buffer 
   } while (MoreArgs(s));
 
   FREE(&tmp);
-
-  notify_send(AttachmentsNotify, NT_ATTACH, NT_ATTACH_DELETE, NULL);
 
   return MUTT_CMD_SUCCESS;
 }

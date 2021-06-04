@@ -64,16 +64,17 @@ int mutt_multi_choice(const char *prompt, const char *letters)
   window_redraw(NULL);
   while (true)
   {
-    if (redraw || SigWinch)
+    if (SigWinch)
+    {
+      //engineer fake commit with oversized multi-choice message
+      SigWinch = false;
+      mutt_resize_screen();
+      redraw = true;
+    }
+
+    if (redraw)
     {
       redraw = false;
-      if (SigWinch)
-      {
-        SigWinch = false;
-        mutt_resize_screen();
-        clearok(stdscr, true);
-        window_redraw(NULL);
-      }
       if (win->state.cols)
       {
         int width = mutt_strwidth(prompt) + 2; // + '?' + space
@@ -88,7 +89,6 @@ int mutt_multi_choice(const char *prompt, const char *letters)
       if (prompt_lines != win->state.rows)
       {
         msgwin_set_height(prompt_lines);
-        window_redraw(NULL);
       }
 
       mutt_window_move(win, 0, 0);
@@ -127,7 +127,7 @@ int mutt_multi_choice(const char *prompt, const char *letters)
       mutt_window_clrtoeol(win);
     }
 
-    mutt_refresh();
+    window_redraw(NULL);
     /* SigWinch is not processed unless timeout is set */
     mutt_getch_timeout(30 * 1000);
     ch = mutt_getch();
@@ -164,7 +164,6 @@ int mutt_multi_choice(const char *prompt, const char *letters)
   else
   {
     msgwin_set_height(1);
-    window_redraw(NULL);
   }
   window_set_focus(old_focus);
   mutt_refresh();
@@ -236,19 +235,18 @@ enum QuadOption mutt_yesorno(const char *msg, enum QuadOption def)
   msg_wid = mutt_strwidth(msg);
 
   struct MuttWindow *old_focus = window_set_focus(win);
-  window_redraw(NULL);
   while (true)
   {
-    if (redraw || SigWinch)
+    if (SigWinch)
+    {
+      SigWinch = false;
+      mutt_resize_screen();
+      redraw = true;
+    }
+
+    if (redraw)
     {
       redraw = false;
-      if (SigWinch)
-      {
-        SigWinch = false;
-        mutt_resize_screen();
-        clearok(stdscr, true);
-        window_redraw(NULL);
-      }
       if (win->state.cols)
       {
         prompt_lines =
@@ -257,8 +255,8 @@ enum QuadOption mutt_yesorno(const char *msg, enum QuadOption def)
       }
       if (prompt_lines != win->state.rows)
       {
+        //engineer fake commit with oversized multi-choice message
         msgwin_set_height(prompt_lines);
-        window_redraw(NULL);
       }
 
       /* maxlen here is sort of arbitrary, so pick a reasonable upper bound */
@@ -274,7 +272,7 @@ enum QuadOption mutt_yesorno(const char *msg, enum QuadOption def)
       mutt_window_clrtoeol(win);
     }
 
-    mutt_refresh();
+    window_redraw(NULL);
     /* SigWinch is not processed unless timeout is set */
     mutt_getch_timeout(30 * 1000);
     ch = mutt_getch();
@@ -321,7 +319,6 @@ enum QuadOption mutt_yesorno(const char *msg, enum QuadOption def)
   else
   {
     msgwin_set_height(1);
-    window_redraw(NULL);
   }
 
   if (def == MUTT_ABORT)

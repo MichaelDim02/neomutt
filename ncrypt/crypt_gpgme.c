@@ -121,13 +121,14 @@ static void redraw_if_needed(gpgme_ctx_t ctx)
 #if (GPGME_VERSION_NUMBER < 0x010800)
   /* gpgme_get_ctx_flag is not available in GPGME < 1.8.0. In this case, stay
    * on the safe side and always redraw. */
-  (void) ctx;
-  mutt_need_hard_redraw();
+  mutt_resize_screen();
+  window_invalidate_all();
 #else
   const char *s = gpgme_get_ctx_flag(ctx, "redraw");
   if (!s /* flag not known */ || *s /* flag true */)
   {
-    mutt_need_hard_redraw();
+    mutt_resize_screen();
+    window_invalidate_all();
   }
 #endif
 }

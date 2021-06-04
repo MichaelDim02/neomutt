@@ -100,6 +100,7 @@ static int pbar_recalc(struct MuttWindow *win)
   {
     mutt_str_replace(&pbar_data->pager_format, buf);
     win->actions |= WA_REPAINT;
+    mutt_debug(LL_DEBUG5, "recalc done, request WA_REPAINT\n");
   }
 
   return 0;
@@ -140,7 +141,8 @@ static int pbar_color_observer(struct NotifyCallback *nc)
   struct EventColor *ev_c = nc->event_data;
   enum ColorId color = ev_c->color;
 
-  if (color != MT_COLOR_STATUS)
+  // MT_COLOR_MAX is sent on `uncolor *`
+  if ((color != MT_COLOR_STATUS) && (color != MT_COLOR_MAX))
     return 0;
 
   struct MuttWindow *win_pbar = nc->global_data;

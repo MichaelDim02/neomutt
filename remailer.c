@@ -709,6 +709,9 @@ void dlg_select_mixmaster_chain(struct ListHead *chainhead)
     {
       case OP_REDRAW:
       {
+        mutt_resize_screen();
+        window_invalidate_all();
+
         mix_redraw_head(win_cbar, chain);
         mix_screen_coordinates(menu->win, type2_list, &coords, chain, 0);
         mix_redraw_chain(win_chain, type2_list, coords, chain, c_cur);

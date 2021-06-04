@@ -405,8 +405,6 @@ int mutt_display_message(struct MuttWindow *win_index, struct MuttWindow *win_ib
     unlink(mutt_buffer_string(tempfile));
     mutt_buffer_pool_release(&cmd);
 
-    if (!OptNoCurses)
-      keypad(stdscr, true);
     if (r != -1)
       mutt_set_flag(m, e, MUTT_READ, true);
     const bool c_prompt_after = cs_subset_bool(NeoMutt->sub, "prompt_after");
@@ -417,6 +415,9 @@ int mutt_display_message(struct MuttWindow *win_index, struct MuttWindow *win_ib
     }
     else
       rc = 0;
+
+    mutt_resize_screen();
+    window_invalidate_all();
   }
 
 cleanup:

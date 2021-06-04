@@ -1727,14 +1727,24 @@ void mutt_what_key(void)
     return;
 
   mutt_window_mvprintw(win, 0, 0, _("Enter keys (%s to abort): "), km_keyname(AbortKey));
+  struct MuttWindow *old_focus = window_set_focus(win);
   do
   {
+    if (SigWinch)
+    {
+      SigWinch = false;
+      mutt_resize_screen();
+      clearok(stdscr, true);
+    }
+
+    window_redraw(NULL);
     ch = getch();
     if ((ch != ERR) && (ch != AbortKey))
     {
       mutt_message(_("Char = %s, Octal = %o, Decimal = %d"), km_keyname(ch), ch, ch);
     }
   } while (ch != ERR && ch != AbortKey);
+  window_set_focus(old_focus);
 
   mutt_flushinp();
   mutt_clear_error();

@@ -488,7 +488,6 @@ static bool edit_address_list(int field, struct AddressList *al)
   if (mutt_addrlist_to_intl(al, &err) != 0)
   {
     mutt_error(_("Bad IDN: '%s'"), err);
-    mutt_refresh();
     FREE(&err);
   }
 

@@ -69,7 +69,7 @@ static void curses_signal_handler(int sig)
 
     case SIGCONT:
       if (!IsEndwin)
-        refresh();
+        mutt_refresh();
       mutt_curses_set_cursor(MUTT_CURSOR_RESTORE_LAST);
       /* We don't receive SIGWINCH when suspended; however, no harm is done by
        * just assuming we received one, and triggering the 'resize' anyway. */

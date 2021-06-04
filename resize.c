@@ -66,6 +66,9 @@ static struct winsize mutt_get_winsize(void)
  */
 void mutt_resize_screen(void)
 {
+  if (OptNoCurses)
+    return;
+
   struct winsize w = mutt_get_winsize();
 
   /* The following two variables are global to slang */
@@ -92,7 +95,6 @@ void mutt_resize_screen(void)
   stdscr = newwin(0, 0, 0, 0);
   keypad(stdscr, true);
   rootwin_set_size(SLtt_Screen_Cols, SLtt_Screen_Rows);
-  window_notify_all(NULL);
 }
 #else
 /**
@@ -121,6 +123,5 @@ void mutt_resize_screen(void)
 
   resizeterm(screenrows, screencols);
   rootwin_set_size(screencols, screenrows);
-  window_notify_all(NULL);
 }
 #endif

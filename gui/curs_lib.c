@@ -284,21 +284,19 @@ int mutt_buffer_get_field(const char *field, struct Buffer *buf, CompletionFlags
   win->help_menu = MENU_EDITOR;
   struct MuttWindow *old_focus = window_set_focus(win);
 
-  window_redraw(NULL);
   do
   {
     if (SigWinch)
     {
       SigWinch = false;
       mutt_resize_screen();
-      clearok(stdscr, true);
-      window_redraw(NULL);
     }
+
+    window_redraw(NULL);
     mutt_window_clearline(win, 0);
     mutt_curses_set_color(MT_COLOR_PROMPT);
     mutt_window_addstr(win, field);
     mutt_curses_set_color(MT_COLOR_NORMAL);
-    mutt_refresh();
     mutt_window_get_coords(win, &col, NULL);
     ret = mutt_enter_string_full(buf->data, buf->dsize, col, complete, multiple,
                                  m, files, numfiles, es);
@@ -389,8 +387,7 @@ void mutt_edit_file(const char *editor, const char *file)
   }
   /* the terminal may have been resized while the editor owned it */
   mutt_resize_screen();
-  keypad(stdscr, true);
-  clearok(stdscr, true);
+  window_invalidate_all();
 
   mutt_buffer_pool_release(&cmd);
 }
@@ -529,10 +526,20 @@ int mutt_buffer_enter_fname(const char *prompt, struct Buffer *fname,
   mutt_window_clrtoeol(win);
   mutt_refresh();
 
+  struct MuttWindow *old_focus = window_set_focus(win);
   do
   {
+    if (SigWinch)
+    {
+      SigWinch = false;
+      mutt_resize_screen();
+    }
+
+    window_redraw(NULL);
     ch = mutt_getch();
   } while (ch.ch == -2); // Timeout
+  window_set_focus(old_focus);
+
   if (ch.ch < 0)
   {
     mutt_window_clearline(win, 0);

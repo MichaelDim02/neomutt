@@ -313,13 +313,13 @@ int menu_loop(struct Menu *menu)
       mutt_window_move(menu->win, menu->win->state.cols - 1, menu->current - menu->top);
     }
 
-    mutt_refresh();
-
     /* try to catch dialog keys before ops */
     if (!ARRAY_EMPTY(&menu->dialog) && (menu_dialog_dokey(menu, &op) == 0))
       return op;
 
     const bool c_auto_tag = cs_subset_bool(menu->sub, "auto_tag");
+
+    window_redraw(NULL);
     op = km_dokey(menu->type);
     if ((op == OP_TAG_PREFIX) || (op == OP_TAG_PREFIX_COND))
     {
@@ -356,7 +356,6 @@ int menu_loop(struct Menu *menu)
     {
       SigWinch = false;
       mutt_resize_screen();
-      clearok(stdscr, true); /* force complete redraw */
     }
 
     if (op < 0)
@@ -448,7 +447,9 @@ int menu_loop(struct Menu *menu)
 
       case OP_ENTER_COMMAND:
         mutt_enter_command();
-        window_redraw(NULL);
+
+        mutt_resize_screen();
+        window_invalidate_all();
         break;
 
       case OP_TAG:
@@ -496,8 +497,9 @@ int menu_loop(struct Menu *menu)
         break;
 
       case OP_REDRAW:
-        clearok(stdscr, true);
-        menu_queue_redraw(menu, MENU_REDRAW_FULL);
+        mutt_message("MENU OP_REDRAW");
+        mutt_resize_screen();
+        window_invalidate_all();
         break;
 
       case OP_HELP:

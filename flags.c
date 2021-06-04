@@ -37,6 +37,7 @@
 #include "mutt.h"
 #include "index/lib.h"
 #include "keymap.h"
+#include "mutt_globals.h"
 #include "protos.h"
 
 /**
@@ -443,14 +444,19 @@ int mutt_change_flag(struct Mailbox *m, struct EmailList *el, bool bf)
   enum MessageType flag = MUTT_NONE;
   struct KeyEvent event;
 
-  struct MuttWindow *old_focus = window_set_focus(win);
-
   mutt_window_mvprintw(win, 0, 0, "%s? (D/N/O/r/*/!): ", bf ? _("Set flag") : _("Clear flag"));
   mutt_window_clrtoeol(win);
-  window_redraw(NULL);
 
+  struct MuttWindow *old_focus = window_set_focus(win);
   do
   {
+    if (SigWinch)
+    {
+      SigWinch = false;
+      mutt_resize_screen();
+    }
+
+    window_redraw(NULL);
     event = mutt_getch();
   } while (event.ch == -2); // Timeout
 

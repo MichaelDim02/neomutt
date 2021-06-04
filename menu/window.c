@@ -73,10 +73,26 @@ static int menu_repaint(struct MuttWindow *win)
 }
 
 /**
+ * menu_window_observer - Listen for window changes affecting the Menu - Implements ::observer_t
+ */
+static int menu_window_observer(struct NotifyCallback *nc)
+{
+  if (!nc->event_data || !nc->global_data)
+    return -1;
+  if (nc->event_type != NT_WINDOW)
+    return 0;
+
+  struct MuttWindow *win = nc->global_data;
+  win->actions |= WA_RECALC | WA_REPAINT;
+  return 0;
+}
+
+/**
  * menu_wdata_free - Destroy a Menu Window - Implements MuttWindow::wdata_free()
  */
 static void menu_wdata_free(struct MuttWindow *win, void **ptr)
 {
+  notify_observer_remove(win->notify, menu_window_observer, win);
   menu_free((struct Menu **) ptr);
 }
 
@@ -98,6 +114,8 @@ struct MuttWindow *menu_new_window(enum MenuType type, struct ConfigSubset *sub)
   win->repaint = menu_repaint;
   win->wdata = menu;
   win->wdata_free = menu_wdata_free;
+
+  notify_observer_add(win->notify, NT_WINDOW, menu_window_observer, win);
 
   menu->win = win;
 

@@ -634,9 +634,6 @@ void window_redraw(struct MuttWindow *win)
   if (!win)
     win = RootWindow;
 
-  window_reflow(win);
-  window_notify_all(win);
-
   window_recalc(win);
   window_repaint(win);
   mutt_refresh();
@@ -762,6 +759,9 @@ static void window_invalidate(struct MuttWindow *win)
  */
 void window_invalidate_all(void)
 {
+  if (OptNoCurses)
+    return;
+
   window_invalidate(RootWindow);
   clearok(stdscr, true);
   keypad(stdscr, true);
@@ -795,4 +795,17 @@ bool window_status_on_top(struct MuttWindow *panel, struct ConfigSubset *sub)
   mutt_window_reflow(panel);
   mutt_debug(LL_DEBUG5, "config done, request WA_REFLOW\n");
   return true;
+}
+
+/**
+ * window_redraw_all - Forcibly redraw the entire screen
+ */
+void window_redraw_all(void)
+{
+  mutt_resize_screen();
+  keypad(stdscr, true);  //XXX move to curses?
+  clearok(stdscr, true); //XXX move to curses?
+  window_recalc(RootWindow);
+  window_repaint(RootWindow);
+  mutt_refresh();
 }
