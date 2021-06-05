@@ -1998,19 +1998,34 @@ void mutt_clear_pager_position(void)
 void pager_queue_redraw(struct PagerPrivateData *priv, MenuRedrawFlags redraw)
 {
   priv->redraw |= redraw;
-  // win_pager->actions |= WA_RECALC;
+  priv->pview->win_pager->actions |= WA_RECALC;
 }
 
 /**
- * pager_custom_redraw - Redraw the pager window
- * @param priv Private Pager data
+ * pager_menu_recalc - Recalc the Pager Window - Implements MuttWindow::recalc()
  */
-static void pager_custom_redraw(struct PagerPrivateData *priv)
+static int pager_menu_recalc(struct MuttWindow *win)
 {
+  win->actions |= WA_REPAINT;
+  mutt_debug(LL_DEBUG5, "recalc done, request WA_REPAINT\n");
+  return 0;
+}
+
+/**
+ * pager_menu_repaint - Repaint the Pager Window - Implements MuttWindow::repaint()
+ */
+static int pager_menu_repaint(struct MuttWindow *win)
+{
+  if (win->type != WT_CUSTOM)
+    return 0;
+
+  if (!mutt_window_is_visible(win))
+    return 0;
+
   //---------------------------------------------------------------------------
   // ASSUMPTIONS & SANITY CHECKS
   //---------------------------------------------------------------------------
-  // Since pager_custom_redraw() is a static function and it is always called
+  // Since pager_menu_repaint() is a static function and it is always called
   // after mutt_pager() we can rely on a series of sanity checks in
   // mutt_pager(), namely:
   // - PAGER_MODE_EMAIL  guarantees ( data->email) and (!data->body)
@@ -2019,6 +2034,7 @@ static void pager_custom_redraw(struct PagerPrivateData *priv)
   //
   // Additionally, while refactoring is still in progress the following checks
   // are still here to ensure data model consistency.
+  struct PagerPrivateData *priv = win->wdata;
   assert(priv);        // Redraw function can't be called without its data.
   assert(priv->pview); // Redraw data can't exist separately without the view.
   assert(priv->pview->pdata); // View can't exist without its data
@@ -2175,6 +2191,7 @@ static void pager_custom_redraw(struct PagerPrivateData *priv)
 
   priv->redraw = MENU_REDRAW_NO_FLAGS;
   mutt_debug(LL_DEBUG5, "repaint done\n");
+  return 0;
 }
 
 /**
@@ -2392,6 +2409,9 @@ int mutt_pager(struct PagerView *pview)
   pview->win_pager->help_data = pager_resolve_help_mapping(pview->mode, mailbox_type);
   pview->win_pager->help_menu = MENU_PAGER;
 
+  pview->win_pager->recalc = pager_menu_recalc;
+  pview->win_pager->repaint = pager_menu_repaint;
+
   //---------- initialize redraw pdata  -----------------------------------------
   pview->win_pager->size = MUTT_WIN_SIZE_MAXIMISE;
   priv->pview = pview;
@@ -2435,7 +2455,7 @@ int mutt_pager(struct PagerView *pview)
          (priv->line_info[priv->curline].offset < (priv->sb.st_size - 1)))
   {
     pager_queue_redraw(priv, MENU_REDRAW_FULL);
-    pager_custom_redraw(priv);
+    pager_menu_repaint(pview->win_index);
     // trick user, as if nothing happened
     // scroll down to previosly saved offset
     priv->topline =
@@ -2478,7 +2498,7 @@ int mutt_pager(struct PagerView *pview)
 
     pager_queue_redraw(priv, MENU_REDRAW_FULL);
     window_redraw(NULL);
-    pager_custom_redraw(priv);
+    pager_menu_repaint(pview->win_index);
 
     const bool c_braille_friendly =
         cs_subset_bool(NeoMutt->sub, "braille_friendly");

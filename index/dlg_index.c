@@ -1089,12 +1089,14 @@ dsl_finish:
 }
 
 /**
- * index_custom_redraw - Redraw the index - Implements Menu::custom_redraw()
+ * index_menu_repaint - Repaint the Index Window - Implements MuttWindow::repaint()
  */
-static void index_custom_redraw(struct Menu *menu)
+static int index_menu_repaint(struct MuttWindow *win)
 {
-  if (menu->redraw & MENU_REDRAW_FULL)
-    menu_redraw_full(menu);
+  if (win->type != WT_MENU)
+    return 0;
+
+  struct Menu *menu = win->wdata;
 
   struct IndexPrivateData *priv = menu->mdata;
   struct IndexSharedData *shared = priv->shared;
@@ -1112,6 +1114,14 @@ static void index_custom_redraw(struct Menu *menu)
 
   menu->redraw = MENU_REDRAW_NO_FLAGS;
   mutt_debug(LL_DEBUG5, "repaint done\n");
+  return 0;
+}
+
+/**
+ * index_custom_redraw - Redraw the index - Implements Menu::custom_redraw()
+ */
+static void index_custom_redraw(struct Menu *menu)
+{
 }
 
 /**
@@ -1152,10 +1162,11 @@ struct Mailbox *mutt_index_menu(struct MuttWindow *dlg, struct Mailbox *m_init)
   priv->menu = priv->win_index->wdata;
   priv->menu->make_entry = index_make_entry;
   priv->menu->color = index_color;
-  priv->menu->custom_redraw = index_custom_redraw;
   priv->menu->max = shared->mailbox ? shared->mailbox->vcount : 0;
   menu_set_index(priv->menu, ci_first_message(shared->mailbox));
   mutt_window_reflow(NULL);
+
+  priv->menu->win->repaint = index_menu_repaint;
 
   if (!priv->attach_msg)
   {

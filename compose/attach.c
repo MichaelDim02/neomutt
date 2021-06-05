@@ -212,19 +212,18 @@ static int attach_window_observer(struct NotifyCallback *nc)
 }
 
 /**
- * compose_custom_redraw - Redraw the compose menu - Implements Menu::custom_redraw()
+ * compose_menu_repaint - Repaint the Compose Window - Implements MuttWindow::repaint()
  */
-static void compose_custom_redraw(struct Menu *menu)
+static int compose_menu_repaint(struct MuttWindow *win)
 {
+  if (win->type != WT_MENU)
+    return 0;
+
+  struct Menu *menu = win->wdata;
+
   if (menu->redraw & MENU_REDRAW_FLOW)
   {
     mutt_window_reflow(dialog_find(menu->win));
-  }
-
-  if (menu->redraw & MENU_REDRAW_FULL)
-  {
-    menu_redraw_full(menu);
-    menu->pagelen = menu->win->state.rows;
   }
 
   if (menu->redraw & MENU_REDRAW_FULL)
@@ -236,6 +235,7 @@ static void compose_custom_redraw(struct Menu *menu)
 
   menu->redraw = MENU_REDRAW_NO_FLAGS;
   mutt_debug(LL_DEBUG5, "repaint done\n");
+  return 0;
 }
 
 /**
@@ -295,10 +295,11 @@ struct MuttWindow *attach_new(struct MuttWindow *parent, struct ComposeSharedDat
 
   menu->make_entry = compose_make_entry;
   menu->tag = compose_attach_tag;
-  menu->custom_redraw = compose_custom_redraw;
   menu->mdata = adata;
   menu->mdata_free = attach_data_free;
   adata->menu = menu;
+
+  menu->win->repaint = compose_menu_repaint;
 
   return win_attach;
 }

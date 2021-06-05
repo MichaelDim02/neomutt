@@ -331,21 +331,6 @@ static void menu_pad_string(struct Menu *menu, char *buf, size_t buflen)
 }
 
 /**
- * menu_redraw_full - Force the redraw of the Menu
- * @param menu Current Menu
- */
-void menu_redraw_full(struct Menu *menu)
-{
-  mutt_curses_set_color(MT_COLOR_NORMAL);
-  mutt_window_clear(menu->win);
-
-  window_redraw(NULL);
-  menu->pagelen = menu->win->state.rows;
-
-  menu->redraw = MENU_REDRAW_FULL;
-}
-
-/**
  * menu_redraw_index - Force the redraw of the index
  * @param menu Current Menu
  */
@@ -493,52 +478,4 @@ void menu_redraw_current(struct Menu *menu)
     print_enriched_string(menu->win, menu->current, attr, (unsigned char *) buf,
                           false, menu->sub);
   mutt_curses_set_color(MT_COLOR_NORMAL);
-}
-
-/**
- * menu_redraw_prompt - Force the redraw of the message window
- * @param menu Current Menu
- */
-static void menu_redraw_prompt(struct Menu *menu)
-{
-  if (!menu || ARRAY_EMPTY(&menu->dialog))
-    return;
-
-  if (OptMsgErr)
-  {
-    mutt_sleep(1);
-    OptMsgErr = false;
-  }
-
-  if (ErrorBufMessage)
-    mutt_clear_error();
-
-  msgwin_set_text(MT_COLOR_NORMAL, menu->prompt);
-}
-
-/**
- * menu_redraw - Redraw the parts of the screen that have been flagged to be redrawn
- * @param menu Menu to redraw
- * @retval OP_NULL   Menu was redrawn
- * @retval OP_REDRAW Full redraw required
- */
-int menu_redraw(struct Menu *menu)
-{
-  if (menu->custom_redraw)
-  {
-    menu->custom_redraw(menu);
-    return OP_NULL;
-  }
-
-  if (menu->redraw & MENU_REDRAW_FULL)
-    menu_redraw_index(menu);
-  else if (menu->redraw & MENU_REDRAW_OLD_CUR)
-    menu_redraw_motion(menu);
-  else if (menu->redraw == MENU_REDRAW_CURRENT)
-    menu_redraw_current(menu);
-
-  if (!ARRAY_EMPTY(&menu->dialog))
-    menu_redraw_prompt(menu);
-
-  return OP_NULL;
 }

@@ -122,12 +122,6 @@ struct Menu
    */
   int (*color)(struct Menu *menu, int line);
 
-  /**
-   * custom_redraw - Redraw the menu
-   * @param menu Menu to redraw
-   */
-  void (*custom_redraw)(struct Menu *menu);
-
   struct Notify *notify;  ///< Notifications
 
   void *mdata;            ///< Private data
@@ -164,10 +158,8 @@ MenuRedrawFlags menu_prev_page     (struct Menu *menu);
 MenuRedrawFlags menu_top_page      (struct Menu *menu);
 
 void         menu_redraw_current(struct Menu *menu);
-void         menu_redraw_full   (struct Menu *menu);
 void         menu_redraw_index  (struct Menu *menu);
 void         menu_redraw_motion (struct Menu *menu);
-int          menu_redraw        (struct Menu *menu);
 
 void         menu_add_dialog_row(struct Menu *menu, const char *row);
 void         menu_cleanup(void);
