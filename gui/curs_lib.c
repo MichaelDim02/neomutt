@@ -288,6 +288,7 @@ int mutt_buffer_get_field(const char *field, struct Buffer *buf, CompletionFlags
   {
     if (SigWinch)
     {
+      //QWQ SIGWINCH
       SigWinch = false;
       mutt_resize_screen();
     }
@@ -386,6 +387,7 @@ void mutt_edit_file(const char *editor, const char *file)
     mutt_error(_("Error running \"%s\""), mutt_buffer_string(cmd));
   }
   /* the terminal may have been resized while the editor owned it */
+  //QWQ EXTERNAL
   mutt_resize_screen();
   window_invalidate_all();
 
@@ -531,10 +533,12 @@ int mutt_buffer_enter_fname(const char *prompt, struct Buffer *fname,
   {
     if (SigWinch)
     {
+      //QWQ SIGWINCH
       SigWinch = false;
       mutt_resize_screen();
     }
 
+    //QWQ LOOP
     window_redraw(NULL);
     ch = mutt_getch();
   } while (ch.ch == -2); // Timeout

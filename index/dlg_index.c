@@ -1318,12 +1318,14 @@ struct Mailbox *mutt_index_menu(struct MuttWindow *dlg, struct Mailbox *m_init)
 
       if (SigWinch)
       {
+        //QWQ SIGWINCH
         SigWinch = false;
         mutt_resize_screen();
         priv->menu->top = 0; /* so we scroll the right amount */
         continue;
       }
 
+      //QWQ LOOP
       window_redraw(NULL);
       op = km_dokey(MENU_MAIN);
 
@@ -1849,6 +1851,7 @@ struct Mailbox *mutt_index_menu(struct MuttWindow *dlg, struct Mailbox *m_init)
 
       case OP_REDRAW:
         mutt_message("INDEX OP_REDRAW");
+        //QWQ Ctrl-L
         mutt_resize_screen();
         window_invalidate_all();
         break;
@@ -3473,6 +3476,7 @@ struct Mailbox *mutt_index_menu(struct MuttWindow *dlg, struct Mailbox *m_init)
       }
 
       case OP_ENTER_COMMAND:
+        //QWQ COMMAND
         mutt_enter_command();
         mutt_check_rescore(shared->mailbox);
 

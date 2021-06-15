@@ -419,6 +419,7 @@ int mutt_invoke_sendmail(struct Mailbox *m, struct AddressList *from,
    * So instead, just force a hard redraw on the next refresh. */
   if (!OptNoCurses)
   {
+    //QWQ EXTERNAL
     mutt_resize_screen();
     window_invalidate_all();
   }

@@ -198,6 +198,7 @@ int mutt_enter_string_full(char *buf, size_t buflen, int col, CompletionFlags fl
 
   while (true)
   {
+    //QWQ LOOP
     window_redraw(NULL);
     if (!pass)
     {
@@ -232,6 +233,7 @@ int mutt_enter_string_full(char *buf, size_t buflen, int col, CompletionFlags fl
                        0);
     }
 
+    //QWQ SIGWINCH - handled by caller
     ch = km_dokey(MENU_EDITOR);
     if (ch < 0)
     {
@@ -700,10 +702,12 @@ int mutt_enter_string_full(char *buf, size_t buflen, int col, CompletionFlags fl
           {
             if (SigWinch)
             {
+              //QWQ SIGWINCH
               SigWinch = false;
               mutt_resize_screen();
             }
 
+            //QWQ LOOP
             window_redraw(NULL);
             event = mutt_getch();
           } while (event.ch == -2); // Timeout

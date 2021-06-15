@@ -709,6 +709,7 @@ void dlg_select_mixmaster_chain(struct ListHead *chainhead)
     {
       case OP_REDRAW:
       {
+        //QWQ Ctrl-L
         mutt_resize_screen();
         window_invalidate_all();
 

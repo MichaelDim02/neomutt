@@ -66,6 +66,7 @@ int mutt_multi_choice(const char *prompt, const char *letters)
   {
     if (SigWinch)
     {
+      //QWQ SIGWINCH
       //engineer fake commit with oversized multi-choice message
       SigWinch = false;
       mutt_resize_screen();
@@ -88,6 +89,7 @@ int mutt_multi_choice(const char *prompt, const char *letters)
       }
       if (prompt_lines != win->state.rows)
       {
+        //QWQ msgwin_set_height(N)
         msgwin_set_height(prompt_lines);
       }
 
@@ -127,6 +129,7 @@ int mutt_multi_choice(const char *prompt, const char *letters)
       mutt_window_clrtoeol(win);
     }
 
+    //QWQ LOOP
     window_redraw(NULL);
     /* SigWinch is not processed unless timeout is set */
     mutt_getch_timeout(30 * 1000);
@@ -163,6 +166,7 @@ int mutt_multi_choice(const char *prompt, const char *letters)
   }
   else
   {
+    //QWQ msgwin_set_height(1)
     msgwin_set_height(1);
   }
   window_set_focus(old_focus);
@@ -239,6 +243,7 @@ enum QuadOption mutt_yesorno(const char *msg, enum QuadOption def)
   {
     if (SigWinch)
     {
+      //QWQ SIGWINCH
       SigWinch = false;
       mutt_resize_screen();
       redraw = true;
@@ -255,6 +260,7 @@ enum QuadOption mutt_yesorno(const char *msg, enum QuadOption def)
       }
       if (prompt_lines != win->state.rows)
       {
+        //QWQ msgwin_set_height(N)
         //engineer fake commit with oversized multi-choice message
         msgwin_set_height(prompt_lines);
       }
@@ -272,6 +278,7 @@ enum QuadOption mutt_yesorno(const char *msg, enum QuadOption def)
       mutt_window_clrtoeol(win);
     }
 
+    //QWQ LOOP
     window_redraw(NULL);
     /* SigWinch is not processed unless timeout is set */
     mutt_getch_timeout(30 * 1000);
@@ -318,6 +325,7 @@ enum QuadOption mutt_yesorno(const char *msg, enum QuadOption def)
   }
   else
   {
+    //QWQ msgwin_set_height(1)
     msgwin_set_height(1);
   }
 

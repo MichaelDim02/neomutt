@@ -250,6 +250,8 @@ static int menu_dialog_dokey(struct Menu *menu, int *ip)
 
   do
   {
+    //QWQ SIGWINCH - handled by caller?
+    //QWQ LOOP
     ch = mutt_getch();
   } while (ch.ch == -2); // Timeout
 
@@ -319,6 +321,7 @@ int menu_loop(struct Menu *menu)
 
     const bool c_auto_tag = cs_subset_bool(menu->sub, "auto_tag");
 
+    //QWQ LOOP
     window_redraw(NULL);
     op = km_dokey(menu->type);
     if ((op == OP_TAG_PREFIX) || (op == OP_TAG_PREFIX_COND))
@@ -354,6 +357,7 @@ int menu_loop(struct Menu *menu)
 
     if (SigWinch)
     {
+      //QWQ SIGWINCH
       SigWinch = false;
       mutt_resize_screen();
     }
@@ -446,6 +450,7 @@ int menu_loop(struct Menu *menu)
         break;
 
       case OP_ENTER_COMMAND:
+        //QWQ COMMAND
         mutt_enter_command();
 
         mutt_resize_screen();
@@ -498,6 +503,7 @@ int menu_loop(struct Menu *menu)
 
       case OP_REDRAW:
         mutt_message("MENU OP_REDRAW");
+        //QWQ Ctrl-L
         mutt_resize_screen();
         window_invalidate_all();
         break;

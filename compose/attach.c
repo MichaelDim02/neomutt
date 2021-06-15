@@ -282,6 +282,7 @@ struct MuttWindow *attach_new(struct MuttWindow *parent, struct ComposeSharedDat
   menu->mdata_free = attach_data_free;
   adata->menu = menu;
 
+  //QWQ Override the Menu's repaint function
   menu->win->repaint = compose_menu_repaint;
 
   return win_attach;

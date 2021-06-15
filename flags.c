@@ -452,10 +452,12 @@ int mutt_change_flag(struct Mailbox *m, struct EmailList *el, bool bf)
   {
     if (SigWinch)
     {
+      //QWQ SIGWINCH
       SigWinch = false;
       mutt_resize_screen();
     }
 
+    //QWQ LOOP
     window_redraw(NULL);
     event = mutt_getch();
   } while (event.ch == -2); // Timeout
