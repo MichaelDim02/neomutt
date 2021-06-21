@@ -4977,7 +4977,7 @@
 ** .dt %r  .dd   .dd Modified/read-only/won't-write/attach-message indicator,
 **                   According to $$status_chars
 ** .dt %R  .dd * .dd Number of read messages in the mailbox (read, seen)
-** .dt %s  .dd   .dd Current sorting mode ($$sort)
+** .dt %s  .dd † .dd Current sorting mode ($$sort)
 ** .dt %S  .dd   .dd Current aux sorting method ($$sort_aux)
 ** .dt %t  .dd * .dd Number of tagged messages in the mailbox
 ** .dt %u  .dd * .dd Number of unread messages in the mailbox (seen or unseen)
@@ -4991,6 +4991,8 @@
 ** For an explanation of "soft-fill", see the $$index_format documentation.
 ** .pp
 ** * = can be optionally printed if nonzero
+** .pp
+** † = can be optionally printed if not threads
 ** .pp
 ** Some of the above sequences can be used to optionally print a string
 ** if their value is nonzero.  For example, you may only want to see the
@@ -5017,6 +5019,12 @@
 ** .pp
 ** If the value of \fIsequence_char\fP is non-zero, \fIif_string\fP will
 ** be expanded, otherwise \fIelse_string\fP will be expanded.
+** .pp
+** As another example, here is how to list the value of $$sort, and only
+** if it is "threads" or "reverse-threads", to also list the value of
+** $$sort_aux:
+** .pp
+** \fC%?s?%s&%s/%S?\fP
 ** .pp
 ** You can force the result of any \fCprintf(3)\fP-like sequence to be lowercase
 ** by prefixing the sequence character with an underscore ("_") sign.

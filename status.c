@@ -343,9 +343,14 @@ static const char *status_format_str(char *buf, size_t buflen, size_t col, int c
 
     case 's':
     {
-      snprintf(fmt, sizeof(fmt), "%%%ss", prec);
       const short c_sort = cs_subset_sort(NeoMutt->sub, "sort");
-      snprintf(buf, buflen, fmt, get_sort_str(tmp, sizeof(tmp), c_sort));
+      if (!optional)
+      {
+        snprintf(fmt, sizeof(fmt), "%%%ss", prec);
+        snprintf(buf, buflen, fmt, get_sort_str(tmp, sizeof(tmp), c_sort));
+      }
+      else if ((c_sort & SORT_MASK) == SORT_THREADS)
+        optional = false;
       break;
     }
 
