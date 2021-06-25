@@ -92,6 +92,7 @@ bool                   mutt_thread_can_collapse      (struct Email *e);
 
 void                   mutt_clear_threads     (struct ThreadsContext *tctx);
 void                   mutt_draw_tree         (struct ThreadsContext *tctx);
+short                  mutt_get_sort_thread   (const struct ConfigSubset *sub);
 bool                   mutt_link_threads      (struct Email *parent, struct EmailList *children, struct Mailbox *m);
 struct HashTable *     mutt_make_id_hash      (struct Mailbox *m);
 int                    mutt_messages_in_thread(struct Mailbox *m, struct Email *e, enum MessageInThread mit);

@@ -4663,6 +4663,10 @@
 ** You may optionally use the "reverse-" prefix to specify reverse sorting
 ** order.
 ** .pp
+** Any ties in the primary sort are broken by $$sort_aux.  When the
+** sort value is "threads", $$sort_thread controls the sorting between
+** threads, and $$sort_aux controls the sorting within a thread.
+** .pp
 ** The "date-sent" value is a synonym for "date". The "mailbox-order" value is
 ** a synonym for "unsorted".
 ** .pp
@@ -4693,20 +4697,21 @@
 ** This provides a secondary sort for messages in the "index" menu, used
 ** when the $$sort value is equal for two messages.
 ** .pp
-** When sorting by threads, this variable controls how threads are sorted
-** in relation to other threads, and how the branches of the thread trees
-** are sorted.  This can be set to any value that $$sort can, except
-** "threads" (in that case, NeoMutt will just use "date").  You can also
-** specify the "last-" prefix in addition to the "reverse-" prefix, but "last-"
-** must come after "reverse-".  The "last-" prefix causes messages to be
-** sorted against its siblings by which has the last descendant, using
-** the rest of $$sort_aux as an ordering.  For instance,
+** When sorting by threads, this variable controls how subthreads are
+** sorted within a single thread (for comparison between threads, see
+** $$sort_thread). This can be set to any value that $$sort can,
+** except "threads" (in that case, NeoMutt will just use "date").  You
+** can also specify the "last-" prefix in addition to the "reverse-"
+** prefix, but "last-" must come after "reverse-".  The "last-" prefix
+** causes message siblings to be sorted according to which has the
+** last descendant, using the rest of $$sort_aux as an ordering.  For
+** instance,
 ** .ts
 ** set sort_aux=last-date-received
 ** .te
 ** .pp
 ** would mean that if a new message is received in a
-** thread, that thread becomes the last one displayed (or the first, if
+** thread, that subthread becomes the last one displayed (or the first, if
 ** you have "\fCset sort=reverse-threads\fP".)
 ** .pp
 ** Note: For reversed-threads $$sort
@@ -4746,6 +4751,34 @@
 ** setting of $$reply_regex.  With $$sort_re \fIunset\fP, mutt will attach
 ** the message whether or not this is the case, as long as the
 ** non-$$reply_regex parts of both messages are identical.
+*/
+
+{ "sort_thread", DT_SORT, SORT_THREADS },
+/*
+** .pp
+** This provides a secondary sort between threads in the "index" menu, used
+** when the $$sort value is "threads".
+** .pp
+** When sorting by threads, this variable controls how threads are
+** sorted in relation to other threads.  For sorting the branches
+** within a thread, see $$sort_aux.  This can be set to any value that
+** $$sort can, where the default value of "threads" defers to the
+** value of $$sort_aux).  You can also specify the "last-" prefix in
+** addition to the "reverse-" prefix, but "last-" must come after
+** "reverse-".  The "last-" prefix causes threads to be sorted
+** according to which has the last descendant, using the rest
+** of $$sort_thread as an ordering.  For instance,
+** .ts
+** set sort_thread=last-date-received
+** .te
+** .pp
+** would mean that if a new message is received in a
+** thread, that thread becomes the last one displayed (or the first, if
+** you have "\fCset sort=reverse-threads\fP".)
+** .pp
+** Note: For reversed-threads $$sort
+** order, $$sort_thread is reversed again (which is not the right thing to do,
+** but kept to not break any existing configuration setting).
 */
 
 { "spam_separator", DT_STRING, "," },
@@ -4980,6 +5013,7 @@
 ** .dt %s  .dd † .dd Current sorting mode ($$sort)
 ** .dt %S  .dd   .dd Current aux sorting method ($$sort_aux)
 ** .dt %t  .dd * .dd Number of tagged messages in the mailbox
+** .dt %T  .dd † .dd Current thread sorting method ($$sort_thread)
 ** .dt %u  .dd * .dd Number of unread messages in the mailbox (seen or unseen)
 ** .dt %v  .dd   .dd NeoMutt version string
 ** .dt %V  .dd * .dd Currently active limit pattern, if any
@@ -5022,9 +5056,9 @@
 ** .pp
 ** As another example, here is how to list the value of $$sort, and only
 ** if it is "threads" or "reverse-threads", to also list the value of
-** $$sort_aux:
+** $$sort_thread; then follow with an unconditional listing of $$sort_aux:
 ** .pp
-** \fC%?s?%s&%s/%S?\fP
+** \fC%?s?%s&%s/%T?/%S\fP
 ** .pp
 ** You can force the result of any \fCprintf(3)\fP-like sequence to be lowercase
 ** by prefixing the sequence character with an underscore ("_") sign.

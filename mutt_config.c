@@ -71,7 +71,7 @@ static const struct Mapping SortAuxMethods[] = {
 };
 
 /**
- * SortMethods - Sort methods for '$sort' for the index
+ * SortMethods - Sort methods for '$sort' and '$sort_thread' for the index
  */
 const struct Mapping SortMethods[] = {
   // clang-format off
@@ -600,13 +600,16 @@ static struct ConfigDef MainVars[] = {
     "Sort method for the index"
   },
   { "sort_aux", DT_SORT|DT_SORT_REVERSE|DT_SORT_LAST|R_INDEX|R_RESORT|R_RESORT_SUB, SORT_DATE, IP SortAuxMethods, NULL,
-    "Secondary sort method for the index"
+    "Secondary sort method for the index, within a thread"
   },
   { "sort_browser", DT_SORT|DT_SORT_REVERSE, SORT_ALPHA, IP SortBrowserMethods, NULL,
     "Sort method for the browser"
   },
   { "sort_re", DT_BOOL|R_INDEX|R_RESORT|R_RESORT_INIT, true, 0, pager_validator,
     "Sort method for the sidebar"
+  },
+  { "sort_thread", DT_SORT|DT_SORT_REVERSE|DT_SORT_LAST|R_INDEX|R_RESORT|R_RESORT_SUB, SORT_THREADS, IP SortMethods, NULL,
+    "Secondary sort method for the index, between distinct threads"
   },
   { "spam_separator", DT_STRING, IP ",", 0, NULL,
     "Separator for multiple spam headers"

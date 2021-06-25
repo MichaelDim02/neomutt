@@ -249,7 +249,8 @@ set   signature=~/.signature            # Silly signature
 set   sig_dashes                        # Add dashes above my signature
 set   smart_wrap                        # Try to be smart when wrapping around lines in the pager
 set   sort=threads                      # sort by threads,
-set   sort_aux=date                     # then by date
+set   sort_thread=last-date             # favor thread with latest activity,
+set   sort_aux=date                     # then by date within a thread
 unset strict_threads                    # don't be strict about threads
 # set   suspend=no                      # Don't suspend - I usually run mutt like this: "xterm -e mutt"
 set   tilde                             # Indicate empty lines in the pager.

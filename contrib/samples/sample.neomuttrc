@@ -89,8 +89,8 @@ set nosave_empty		# remove files when no messages are left
 # discussion.  NeoMutt will draw a nice tree showing how the discussion flows.
 set sort=threads		# primary sorting method
 
-#set sort_aux=reverse-date-received	# how to sort subthreads
-#set sort_aux=last-date		# date of the last message in thread
+#set sort_aux=date-received   	# within thread, sort subthreads by date started
+#set sort_thread=reverse-last-threads		# sort overall thread with latest activity first
 set sort_browser=reverse-date	# how to sort files in the dir browser
 set spool_file='~/mailbox'	# where my new mail is located
 #set status_format="-%r-NeoMutt: %f [Msgs:%?M?%M/?%m%?n? New:%n?%?d? Del:%d?%?F? Flag:%F?%?t? Tag:%t?%?p? Post:%p?%?b? Inc:%b?  %l]---(%s)-%>-(%P)---"

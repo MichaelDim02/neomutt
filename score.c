@@ -67,8 +67,10 @@ void mutt_check_rescore(struct Mailbox *m)
   if (OptNeedRescore && c_score)
   {
     const short c_sort = cs_subset_sort(NeoMutt->sub, "sort");
+    const short c_sort_thread = cs_subset_sort(NeoMutt->sub, "sort_thread");
     const short c_sort_aux = cs_subset_sort(NeoMutt->sub, "sort_aux");
-    if (((c_sort & SORT_MASK) == SORT_SCORE) || ((c_sort_aux & SORT_MASK) == SORT_SCORE))
+    if (((c_sort & SORT_MASK) == SORT_SCORE) || ((c_sort_thread & SORT_MASK) == SORT_SCORE) ||
+        ((c_sort_aux & SORT_MASK) == SORT_SCORE))
     {
       OptNeedResort = true;
       if ((c_sort & SORT_MASK) == SORT_THREADS)

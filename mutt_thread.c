@@ -51,8 +51,26 @@ struct ThreadsContext
   struct Mailbox *mailbox; ///< Current mailbox
   struct MuttThread *tree; ///< Top of thread tree
   struct HashTable *hash;  ///< Hash table for threads
-  short c_sort;            ///< Sort method
+  short c_sort_thread;     ///< Last sort_thread method
+  short c_sort_aux;        ///< Last sort_aux method
 };
+
+/**
+ * mutt_get_sort_thread - Resolve the value of $sort_thread
+ * @param sub The ConfigSubset to query
+ * @retval value sort method to use between top-level threads
+ */
+short mutt_get_sort_thread(const struct ConfigSubset *sub)
+{
+  short c_sort_thread = cs_subset_sort(sub, "sort_thread");
+  if ((c_sort_thread & SORT_MASK) == SORT_THREADS)
+  {
+    const short c_sort_aux = cs_subset_sort(sub, "sort_aux");
+    c_sort_thread = (c_sort_thread & ~SORT_MASK) ^ c_sort_aux;
+    assert((c_sort_thread & SORT_MASK) != SORT_THREADS);
+  }
+  return c_sort_thread;
+}
 
 /**
  * is_visible - Is the message visible?
@@ -677,8 +695,17 @@ static int compare_threads(const void *a, const void *b, void *arg)
   assert(ta->parent == tb->parent);
   /* If c_sort ties, remember we are building the thread array in
    * reverse from the index the mails had in the mailbox.  */
-  return mutt_compare_emails(ta->sort_key, tb->sort_key, mx_type(tctx->mailbox),
-                             tctx->c_sort, SORT_REVERSE | SORT_ORDER);
+  if (ta->parent)
+  {
+    return mutt_compare_emails(ta->sort_aux_key, tb->sort_aux_key, mx_type(tctx->mailbox),
+                               tctx->c_sort_aux, SORT_REVERSE | SORT_ORDER);
+  }
+  else
+  {
+    return mutt_compare_emails(ta->sort_thread_key, tb->sort_thread_key,
+                               mx_type(tctx->mailbox), tctx->c_sort_thread,
+                               SORT_REVERSE | SORT_ORDER);
+  }
 }
 
 /**
@@ -693,7 +720,8 @@ static void mutt_sort_subthreads(struct ThreadsContext *tctx, bool init)
     return;
 
   struct MuttThread **array = NULL, *top = NULL, *tmp = NULL;
-  struct Email *sort_key = NULL, *oldsort_key = NULL;
+  struct Email *sort_aux_key = NULL, *oldsort_aux_key = NULL;
+  struct Email *oldsort_thread_key = NULL;
   int i, array_size;
   bool sort_top = false;
 
@@ -701,9 +729,12 @@ static void mutt_sort_subthreads(struct ThreadsContext *tctx, bool init)
    * but we want to have to move less stuff around if we're
    * resorting, so we sort backwards and then put them back
    * in reverse order so they're forwards */
-  short c_sort = cs_subset_sort(NeoMutt->sub, "sort_aux");
-  c_sort ^= SORT_REVERSE;
-  tctx->c_sort = c_sort;
+  short c_sort_aux = cs_subset_sort(NeoMutt->sub, "sort_aux");
+  short c_sort_thread = mutt_get_sort_thread(NeoMutt->sub);
+  c_sort_aux ^= SORT_REVERSE;
+  tctx->c_sort_aux = c_sort_aux;
+  c_sort_thread ^= SORT_REVERSE;
+  tctx->c_sort_thread = c_sort_thread;
 
   top = thread;
 
@@ -711,9 +742,10 @@ static void mutt_sort_subthreads(struct ThreadsContext *tctx, bool init)
   array = mutt_mem_calloc(array_size, sizeof(struct MuttThread *));
   while (true)
   {
-    if (init || !thread->sort_key)
+    if (init || !thread->sort_thread_key || !thread->sort_aux_key)
     {
-      thread->sort_key = NULL;
+      thread->sort_thread_key = NULL;
+      thread->sort_aux_key = NULL;
 
       if (thread->parent)
         thread->parent->sort_children = true;
@@ -729,7 +761,8 @@ static void mutt_sort_subthreads(struct ThreadsContext *tctx, bool init)
     else
     {
       /* if it has no children, it must be real. sort it on its own merits */
-      thread->sort_key = thread->message;
+      thread->sort_thread_key = thread->message;
+      thread->sort_aux_key = thread->message;
 
       if (thread->next)
       {
@@ -776,33 +809,72 @@ static void mutt_sort_subthreads(struct ThreadsContext *tctx, bool init)
         tmp = thread;
         thread = thread->parent;
 
-        if (!thread->sort_key || thread->sort_children)
+        if (!thread->sort_thread_key || !thread->sort_aux_key || thread->sort_children)
         {
-          /* make sort_key the first or last sibling, as appropriate */
-          sort_key = ((!(c_sort & SORT_LAST)) ^ (!(c_sort & SORT_REVERSE))) ?
-                         thread->child->sort_key :
-                         tmp->sort_key;
-
           /* we just sorted its children */
           thread->sort_children = false;
 
-          oldsort_key = thread->sort_key;
-          thread->sort_key = thread->message;
+          oldsort_aux_key = thread->sort_aux_key;
+          oldsort_thread_key = thread->sort_thread_key;
 
-          if (c_sort & SORT_LAST)
+          /* update sort keys. sort_aux_key will be the first or last
+           * sibling, as appropriate... */
+          thread->sort_aux_key = thread->message;
+          sort_aux_key = ((!(c_sort_aux & SORT_LAST)) ^ (!(c_sort_aux & SORT_REVERSE))) ?
+                             thread->child->sort_aux_key :
+                             tmp->sort_aux_key;
+
+          if (c_sort_aux & SORT_LAST)
           {
-            if (!thread->sort_key ||
-                (mutt_compare_emails(thread->sort_key, sort_key, mx_type(tctx->mailbox),
-                                     c_sort | SORT_REVERSE, SORT_ORDER) > 0))
+            if (!thread->sort_aux_key ||
+                (mutt_compare_emails(thread->sort_aux_key, sort_aux_key, mx_type(tctx->mailbox),
+                                     c_sort_aux | SORT_REVERSE, SORT_ORDER) > 0))
             {
-              thread->sort_key = sort_key;
+              thread->sort_aux_key = sort_aux_key;
             }
           }
-          else if (!thread->sort_key)
-            thread->sort_key = sort_key;
+          else if (!thread->sort_aux_key)
+            thread->sort_aux_key = sort_aux_key;
 
-          /* if its sort_key has changed, we need to resort it and siblings */
-          if (oldsort_key != thread->sort_key)
+          /* ...but sort_thread_key may require searching the entire
+           * list of siblings */
+          if ((c_sort_aux & ~SORT_REVERSE) == (c_sort_thread & ~SORT_REVERSE))
+          {
+            thread->sort_thread_key = thread->sort_aux_key;
+          }
+          else
+          {
+            if (thread->message)
+            {
+              thread->sort_thread_key = thread->message;
+            }
+            else if ((c_sort_thread & SORT_REVERSE) == (c_sort_aux & SORT_REVERSE))
+            {
+              thread->sort_thread_key = tmp->sort_thread_key;
+            }
+            else
+            {
+              thread->sort_thread_key = thread->child->sort_thread_key;
+            }
+            if (c_sort_thread & SORT_LAST)
+            {
+              for (tmp = thread->child; tmp; tmp = tmp->next)
+              {
+                if (tmp->sort_thread_key == thread->sort_thread_key)
+                  continue;
+                if ((mutt_compare_emails(thread->sort_thread_key, tmp->sort_thread_key,
+                                         mx_type(tctx->mailbox), c_sort_thread | SORT_REVERSE,
+                                         SORT_ORDER) > 0))
+                {
+                  thread->sort_thread_key = tmp->sort_thread_key;
+                }
+              }
+            }
+          }
+
+          /* if a sort_key has changed, we need to resort it and siblings */
+          if ((oldsort_aux_key != thread->sort_aux_key) ||
+              (oldsort_thread_key != thread->sort_thread_key))
           {
             if (thread->parent)
               thread->parent->sort_children = true;
@@ -953,7 +1025,8 @@ void mutt_sort_threads(struct ThreadsContext *tctx, bool init)
             tmp = thread->parent;
             unlink_message(&tmp->child, thread);
             thread->parent = NULL;
-            thread->sort_key = NULL;
+            thread->sort_thread_key = NULL;
+            thread->sort_aux_key = NULL;
             thread->fake_thread = false;
             thread = tmp;
           } while (thread != &top && !thread->child && !thread->message);

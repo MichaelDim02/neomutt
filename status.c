@@ -92,6 +92,7 @@ struct MenuStatusLineData
  * | \%r     | Readonly/wontwrite/changed flag
  * | \%S     | Current aux sorting method (`$sort_aux`)
  * | \%s     | Current sorting method (`$sort`)
+ * | \%T     | Current thread sorting method (`$sort_thread`)
  * | \%t     | Number of tagged messages
  * | \%u     | Number of unread messages
  * | \%V     | Currently active limit pattern
@@ -371,6 +372,19 @@ static const char *status_format_str(char *buf, size_t buflen, size_t col, int c
         snprintf(buf, buflen, fmt, num);
       }
       else if (num == 0)
+        optional = false;
+      break;
+    }
+
+    case 'T':
+    {
+      const short c_sort_thread = cs_subset_sort(NeoMutt->sub, "sort_thread");
+      if (!optional)
+      {
+        snprintf(fmt, sizeof(fmt), "%%%ss", prec);
+        snprintf(buf, buflen, fmt, get_sort_str(tmp, sizeof(tmp), c_sort_thread));
+      }
+      else if ((c_sort_thread & SORT_MASK) == SORT_THREADS)
         optional = false;
       break;
     }
