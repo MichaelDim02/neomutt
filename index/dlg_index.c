@@ -1118,13 +1118,6 @@ static int index_menu_repaint(struct MuttWindow *win)
 }
 
 /**
- * index_custom_redraw - Redraw the index - Implements Menu::custom_redraw()
- */
-static void index_custom_redraw(struct Menu *menu)
-{
-}
-
-/**
  * mutt_index_menu - Display a list of emails
  * @param dlg Dialog containing Windows to draw on
  * @param m_init Initial mailbox
@@ -1332,8 +1325,6 @@ struct Mailbox *mutt_index_menu(struct MuttWindow *dlg, struct Mailbox *m_init)
     }
     else
     {
-      index_custom_redraw(priv->menu);
-
       /* give visual indication that the next command is a tag- command */
       if (priv->tag)
         msgwin_set_text(MT_COLOR_NORMAL, "tag-");
