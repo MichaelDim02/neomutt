@@ -2632,6 +2632,7 @@ int mutt_pager(struct PagerView *pview)
       continue;
     }
 
+    pager_queue_redraw(priv, MENU_REDRAW_FULL);
     window_redraw(NULL);
     //-------------------------------------------------------------------------
     // Finally, read user's key press
