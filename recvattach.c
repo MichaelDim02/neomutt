@@ -811,7 +811,7 @@ void mutt_save_attachment_list(struct AttachCtx *actx, FILE *fp, bool tag,
         if (tag && menu && top->aptr)
         {
           menu_set_index(menu, top->aptr->num);
-          menu_queue_redraw(menu, MENU_REDRAW_MOTION);
+          menu_queue_redraw(menu, MENU_REDRAW_OLD_CUR);
 
           menu_redraw(menu);
         }
@@ -839,7 +839,7 @@ void mutt_save_attachment_list(struct AttachCtx *actx, FILE *fp, bool tag,
   if (tag && menu)
   {
     menu_set_index(menu, last);
-    menu_queue_redraw(menu, MENU_REDRAW_MOTION);
+    menu_queue_redraw(menu, MENU_REDRAW_OLD_CUR);
   }
 
   if (rc == 0)
@@ -1387,7 +1387,7 @@ int mutt_attach_display_loop(struct ConfigSubset *sub, struct Menu *menu, int op
         else
           mutt_edit_content_type(e, cur_att->body, cur_att->fp);
 
-        menu_queue_redraw(menu, MENU_REDRAW_INDEX);
+        menu_queue_redraw(menu, MENU_REDRAW_FULL);
         op = OP_VIEW_ATTACH;
         break;
       }
@@ -1572,7 +1572,7 @@ static void mutt_update_recvattach_menu(struct ConfigSubset *sub, struct AttachC
   const int index = menu_get_index(menu);
   if (index >= menu->max)
     menu_set_index(menu, menu->max - 1);
-  menu_queue_redraw(menu, MENU_REDRAW_INDEX);
+  menu_queue_redraw(menu, MENU_REDRAW_FULL);
 }
 
 /**
@@ -1812,7 +1812,7 @@ void dlg_select_attachment(struct ConfigSubset *sub, struct Mailbox *m,
               if (actx->idx[i]->parent_type == TYPE_MULTIPART)
               {
                 actx->idx[i]->body->deleted = true;
-                menu_queue_redraw(menu, MENU_REDRAW_INDEX);
+                menu_queue_redraw(menu, MENU_REDRAW_FULL);
               }
               else
               {
@@ -1847,7 +1847,7 @@ void dlg_select_attachment(struct ConfigSubset *sub, struct Mailbox *m,
             if (actx->idx[i]->body->tagged)
             {
               actx->idx[i]->body->deleted = false;
-              menu_queue_redraw(menu, MENU_REDRAW_INDEX);
+              menu_queue_redraw(menu, MENU_REDRAW_FULL);
             }
           }
         }
@@ -1956,7 +1956,7 @@ void dlg_select_attachment(struct ConfigSubset *sub, struct Mailbox *m,
 
       case OP_EDIT_TYPE:
         recvattach_edit_content_type(sub, actx, menu, e);
-        menu_queue_redraw(menu, MENU_REDRAW_INDEX);
+        menu_queue_redraw(menu, MENU_REDRAW_FULL);
         break;
 
       case OP_EXIT:

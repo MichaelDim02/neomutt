@@ -464,7 +464,7 @@ int menu_loop(struct Menu *menu)
           {
             for (int i = 0; i < menu->max; i++)
               menu->tagged += menu->tag(menu, i, 0);
-            menu->redraw |= MENU_REDRAW_INDEX;
+            menu_queue_redraw(menu, MENU_REDRAW_FULL);
           }
           else if (menu->max != 0)
           {
@@ -475,7 +475,7 @@ int menu_loop(struct Menu *menu)
               menu_set_index(menu, menu->current + 1);
             }
             else
-              menu->redraw |= MENU_REDRAW_CURRENT;
+              menu_queue_redraw(menu, MENU_REDRAW_CURRENT);
           }
           else
             mutt_error(_("No entries"));
@@ -501,12 +501,12 @@ int menu_loop(struct Menu *menu)
 
       case OP_REDRAW:
         clearok(stdscr, true);
-        menu->redraw = MENU_REDRAW_FULL;
+        menu_queue_redraw(menu, MENU_REDRAW_FULL);
         break;
 
       case OP_HELP:
         mutt_help(menu->type);
-        menu->redraw = MENU_REDRAW_FULL;
+        menu_queue_redraw(menu, MENU_REDRAW_FULL);
         break;
 
       case OP_NULL:
@@ -584,7 +584,6 @@ struct Menu *menu_new(enum MenuType type, struct MuttWindow *win, struct ConfigS
   struct Menu *menu = mutt_mem_calloc(1, sizeof(struct Menu));
 
   menu->type = type;
-  menu->redraw = MENU_REDRAW_FULL;
   menu->color = default_color;
   menu->search = generic_search;
   menu->notify = notify_new();
@@ -615,7 +614,7 @@ int menu_get_index(struct Menu *menu)
  * menu_set_index - Set the current selection in the Menu
  * @param menu  Menu
  * @param index Item to select
- * @retval num #MenuRedrawFlags, e.g. #MENU_REDRAW_INDEX
+ * @retval num #MenuRedrawFlags, e.g. ##MENU_REDRAW_CURRENT
  */
 MenuRedrawFlags menu_set_index(struct Menu *menu, int index)
 {

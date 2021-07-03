@@ -342,7 +342,7 @@ void menu_redraw_full(struct Menu *menu)
   window_redraw(NULL);
   menu->pagelen = menu->win_index->state.rows;
 
-  menu->redraw = MENU_REDRAW_INDEX | MENU_REDRAW_STATUS;
+  menu->redraw = MENU_REDRAW_FULL | MENU_REDRAW_STATUS;
 }
 
 /**
@@ -434,7 +434,7 @@ void menu_redraw_motion(struct Menu *menu)
 
   if (!ARRAY_EMPTY(&menu->dialog))
   {
-    menu->redraw &= ~MENU_REDRAW_MOTION;
+    menu->redraw &= ~MENU_REDRAW_OLD_CUR;
     return;
   }
 
@@ -564,19 +564,11 @@ int menu_redraw(struct Menu *menu)
     return OP_NULL;
   }
 
-  /* See if all or part of the screen needs to be updated.  */
-  if (menu->redraw & MENU_REDRAW_FULL)
-  {
-    menu_redraw_full(menu);
-    /* allow the caller to do any local configuration */
-    return OP_REDRAW;
-  }
-
   if (menu->redraw & MENU_REDRAW_STATUS)
     menu_redraw_status(menu);
-  if (menu->redraw & MENU_REDRAW_INDEX)
+  if (menu->redraw & MENU_REDRAW_FULL)
     menu_redraw_index(menu);
-  else if (menu->redraw & MENU_REDRAW_MOTION)
+  else if (menu->redraw & MENU_REDRAW_OLD_CUR)
     menu_redraw_motion(menu);
   else if (menu->redraw == MENU_REDRAW_CURRENT)
     menu_redraw_current(menu);

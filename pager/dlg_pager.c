@@ -2091,7 +2091,7 @@ static void pager_custom_redraw(struct PagerPrivateData *priv)
       menu_redraw_index(priv->menu);
     }
 
-    pager_queue_redraw(priv, MENU_REDRAW_BODY | MENU_REDRAW_INDEX | MENU_REDRAW_STATUS);
+    pager_queue_redraw(priv, MENU_REDRAW_BODY | MENU_REDRAW_FULL | MENU_REDRAW_STATUS);
   }
 
   if (priv->redraw & MENU_REDRAW_FLOW)
@@ -3415,7 +3415,7 @@ int mutt_pager(struct PagerView *pview)
             cs_subset_bool(NeoMutt->sub, "delete_untag");
         if (c_delete_untag)
           mutt_set_flag(m, pview->pdata->email, MUTT_TAG, false);
-        pager_queue_redraw(priv, MENU_REDRAW_STATUS | MENU_REDRAW_INDEX);
+        pager_queue_redraw(priv, MENU_REDRAW_STATUS | MENU_REDRAW_FULL);
         const bool c_resolve = cs_subset_bool(NeoMutt->sub, "resolve");
         if (c_resolve)
         {
@@ -3439,7 +3439,7 @@ int mutt_pager(struct PagerView *pview)
         emaillist_add_email(&el, pview->pdata->email);
 
         if (mutt_change_flag(m, &el, (op == OP_MAIN_SET_FLAG)) == 0)
-          pager_queue_redraw(priv, MENU_REDRAW_STATUS | MENU_REDRAW_INDEX);
+          pager_queue_redraw(priv, MENU_REDRAW_STATUS | MENU_REDRAW_FULL);
         const bool c_resolve = cs_subset_bool(NeoMutt->sub, "resolve");
         if (pview->pdata->email->deleted && c_resolve)
         {
@@ -3495,7 +3495,7 @@ int mutt_pager(struct PagerView *pview)
             (cs_subset_number(NeoMutt->sub, "pager_index_lines") != 0))
           pager_queue_redraw(priv, MENU_REDRAW_FULL);
         else
-          pager_queue_redraw(priv, MENU_REDRAW_STATUS | MENU_REDRAW_INDEX);
+          pager_queue_redraw(priv, MENU_REDRAW_STATUS | MENU_REDRAW_FULL);
 
         break;
       }
@@ -3551,7 +3551,7 @@ int mutt_pager(struct PagerView *pview)
           break;
 
         mutt_set_flag(m, pview->pdata->email, MUTT_FLAG, !pview->pdata->email->flagged);
-        pager_queue_redraw(priv, MENU_REDRAW_STATUS | MENU_REDRAW_INDEX);
+        pager_queue_redraw(priv, MENU_REDRAW_STATUS | MENU_REDRAW_FULL);
         const bool c_resolve = cs_subset_bool(NeoMutt->sub, "resolve");
         if (c_resolve)
         {
@@ -3867,7 +3867,7 @@ int mutt_pager(struct PagerView *pview)
             rc = OP_MAIN_NEXT_UNDELETED;
           }
           else
-            pager_queue_redraw(priv, MENU_REDRAW_STATUS | MENU_REDRAW_INDEX);
+            pager_queue_redraw(priv, MENU_REDRAW_STATUS | MENU_REDRAW_FULL);
         }
         emaillist_clear(&el);
         break;
@@ -3890,7 +3890,7 @@ int mutt_pager(struct PagerView *pview)
           break;
         mutt_set_flag(m, pview->pdata->email, MUTT_TAG, !pview->pdata->email->tagged);
 
-        pager_queue_redraw(priv, MENU_REDRAW_STATUS | MENU_REDRAW_INDEX);
+        pager_queue_redraw(priv, MENU_REDRAW_STATUS | MENU_REDRAW_FULL);
         const bool c_resolve = cs_subset_bool(NeoMutt->sub, "resolve");
         if (c_resolve)
         {
@@ -3920,7 +3920,7 @@ int mutt_pager(struct PagerView *pview)
         first = false;
         pview->pdata->ctx->msg_in_pager = -1;
         priv->win_pbar->actions |= WA_RECALC;
-        pager_queue_redraw(priv, MENU_REDRAW_STATUS | MENU_REDRAW_INDEX);
+        pager_queue_redraw(priv, MENU_REDRAW_STATUS | MENU_REDRAW_FULL);
         const bool c_resolve = cs_subset_bool(NeoMutt->sub, "resolve");
         if (c_resolve)
         {
@@ -3946,7 +3946,7 @@ int mutt_pager(struct PagerView *pview)
 
         mutt_set_flag(m, pview->pdata->email, MUTT_DELETE, false);
         mutt_set_flag(m, pview->pdata->email, MUTT_PURGE, false);
-        pager_queue_redraw(priv, MENU_REDRAW_STATUS | MENU_REDRAW_INDEX);
+        pager_queue_redraw(priv, MENU_REDRAW_STATUS | MENU_REDRAW_FULL);
         const bool c_resolve = cs_subset_bool(NeoMutt->sub, "resolve");
         if (c_resolve)
         {
@@ -3992,9 +3992,11 @@ int mutt_pager(struct PagerView *pview)
 
           if (!c_resolve &&
               (cs_subset_number(NeoMutt->sub, "pager_index_lines") != 0))
+          {
             pager_queue_redraw(priv, MENU_REDRAW_FULL);
+          }
           else
-            pager_queue_redraw(priv, MENU_REDRAW_STATUS | MENU_REDRAW_INDEX);
+            pager_queue_redraw(priv, MENU_REDRAW_STATUS | MENU_REDRAW_FULL);
         }
         break;
       }

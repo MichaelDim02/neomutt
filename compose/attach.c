@@ -216,8 +216,6 @@ static int attach_window_observer(struct NotifyCallback *nc)
  */
 static void compose_custom_redraw(struct Menu *menu)
 {
-  // menu->redraw |= MENU_REDRAW_FULL;
-
   if (menu->redraw & MENU_REDRAW_FLOW)
   {
     mutt_window_reflow(dialog_find(menu->win_index));
@@ -229,12 +227,13 @@ static void compose_custom_redraw(struct Menu *menu)
     menu->pagelen = menu->win_index->state.rows;
   }
 
-  if (menu->redraw & MENU_REDRAW_INDEX)
+  if (menu->redraw & MENU_REDRAW_FULL)
     menu_redraw_index(menu);
-  else if (menu->redraw & (MENU_REDRAW_MOTION | MENU_REDRAW_MOTION))
+  else if (menu->redraw & MENU_REDRAW_OLD_CUR)
     menu_redraw_motion(menu);
   else if (menu->redraw == MENU_REDRAW_CURRENT)
     menu_redraw_current(menu);
+
   menu->redraw = MENU_REDRAW_NO_FLAGS;
   mutt_debug(LL_DEBUG5, "repaint done\n");
 }

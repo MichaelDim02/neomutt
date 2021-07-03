@@ -47,13 +47,13 @@
 
 struct ConfigSubset;
 
-typedef uint8_t MenuRedrawFlags;       ///< Flags, e.g. #MENU_REDRAW_INDEX
+typedef uint8_t MenuRedrawFlags;       ///< Flags, e.g. #MENU_REDRAW_CURRENT
 #define MENU_REDRAW_NO_FLAGS        0  ///< No flags are set
-#define MENU_REDRAW_INDEX     (1 << 0) ///< Redraw the index
-#define MENU_REDRAW_MOTION    (1 << 1) ///< Redraw after moving the menu list
-#define MENU_REDRAW_CURRENT   (1 << 2) ///< Redraw the current line of the menu
-#define MENU_REDRAW_STATUS    (1 << 3) ///< Redraw the status bar
-#define MENU_REDRAW_FULL      (1 << 4) ///< Redraw everything
+#define MENU_REDRAW_CURRENT   (1 << 1) ///< Redraw the current selection
+#define MENU_REDRAW_OLD_CUR   (1 << 2) ///< Redraw the previous selection
+#define MENU_REDRAW_FULL      (1 << 3) ///< Redraw the entire Menu
+
+#define MENU_REDRAW_STATUS    (1 << 4) ///< Redraw the status bar
 #define MENU_REDRAW_BODY      (1 << 5) ///< Redraw the pager
 #define MENU_REDRAW_FLOW      (1 << 6) ///< Used by pager to reflow text
 

@@ -2068,7 +2068,7 @@ void mutt_buffer_select_file(struct Buffer *file, SelectFileFlags flags,
             menu_set_index(menu, index);
         }
         if (rc)
-          menu_queue_redraw(menu, MENU_REDRAW_INDEX);
+          menu_queue_redraw(menu, MENU_REDRAW_FULL);
         nntp_newsrc_close(CurrentNewsSrv);
         break;
       }
