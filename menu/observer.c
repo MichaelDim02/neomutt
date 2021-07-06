@@ -103,7 +103,7 @@ static int menu_window_observer(struct NotifyCallback *nc)
     menu->pagelen = win_menu->state.rows;
     menu->redraw |= MENU_REDRAW_INDEX;
 
-    win_menu->actions |= WA_REPAINT;
+    win_menu->actions |= WA_RECALC | WA_REPAINT;
     mutt_debug(LL_DEBUG5,
                "window state done, request MENU_REDRAW_INDEX, WA_REPAINT\n");
   }
