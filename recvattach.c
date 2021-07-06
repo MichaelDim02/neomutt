@@ -811,7 +811,6 @@ void mutt_save_attachment_list(struct AttachCtx *actx, FILE *fp, bool tag,
         if (tag && menu && top->aptr)
         {
           menu_set_index(menu, top->aptr->num);
-          menu_check_recenter(menu);
           menu_queue_redraw(menu, MENU_REDRAW_MOTION);
 
           menu_redraw(menu);
@@ -840,7 +839,6 @@ void mutt_save_attachment_list(struct AttachCtx *actx, FILE *fp, bool tag,
   if (tag && menu)
   {
     menu_set_index(menu, last);
-    menu_check_recenter(menu);
     menu_queue_redraw(menu, MENU_REDRAW_MOTION);
   }
 
@@ -1574,7 +1572,6 @@ static void mutt_update_recvattach_menu(struct ConfigSubset *sub, struct AttachC
   const int index = menu_get_index(menu);
   if (index >= menu->max)
     menu_set_index(menu, menu->max - 1);
-  menu_check_recenter(menu);
   menu_queue_redraw(menu, MENU_REDRAW_INDEX);
 }
 
