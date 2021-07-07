@@ -30,6 +30,7 @@
 #include <stdio.h>
 #include "mutt/lib.h"
 #include "config/lib.h"
+#include "core/lib.h"
 #include "gui/lib.h"
 #include "gui.h"
 #include "lib.h"
@@ -48,10 +49,21 @@ int alias_config_observer(struct NotifyCallback *nc)
 
   struct EventConfig *ev_c = nc->event_data;
 
-  if (!mutt_str_equal(ev_c->name, "sort_alias"))
-    return 0;
+  const short c_menu_context = cs_subset_number(NeoMutt->sub, "menu_context");
+  const bool c_menu_move_off = cs_subset_bool(NeoMutt->sub, "menu_move_off");
+  const bool c_menu_scroll = cs_subset_bool(NeoMutt->sub, "menu_scroll");
 
   struct Menu *menu = nc->global_data;
+  struct MuttWindow *dlg = dialog_find(menu->win);
+
+  char buf[256] = { 0 };
+  snprintf(buf, sizeof(buf), "context = %d, move_off = %s, scroll = %s",
+           c_menu_context, BoolValues[c_menu_move_off], BoolValues[c_menu_scroll]);
+  struct MuttWindow *sbar = window_find_child(dlg, WT_STATUS_BAR);
+  sbar_set_title(sbar, buf);
+
+  if (!mutt_str_equal(ev_c->name, "sort_alias"))
+    return 0;
 
   menu_queue_redraw(menu, MENU_REDRAW_FULL);
   mutt_debug(LL_DEBUG5, "config done, request WA_RECALC, MENU_REDRAW_FULL\n");

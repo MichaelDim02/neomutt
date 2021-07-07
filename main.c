@@ -824,8 +824,10 @@ int main(int argc, char *argv[], char *envp[])
     mutt_buffer_pool_release(&fpath);
   }
 
-  if (batch_mode)
+  // if (batch_mode)
   {
+    char buf[1024] = { 0 };
+    alias_complete(buf, sizeof(buf), NeoMutt->sub);
     goto main_ok; // TEST22: neomutt -B
   }
 

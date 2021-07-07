@@ -98,7 +98,7 @@ static const char *alias_format_str(char *buf, size_t buflen, size_t col, int co
       break;
     case 'n':
       snprintf(fmt, sizeof(fmt), "%%%sd", prec);
-      snprintf(buf, buflen, fmt, av->num + 1);
+      snprintf(buf, buflen, fmt, av->num);
       break;
     case 'r':
       addr[0] = '\0';

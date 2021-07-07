@@ -568,7 +568,7 @@ static const char *index_format_str(char *buf, size_t buflen, size_t col, int co
       colorlen = add_index_color(fmt, sizeof(fmt), flags, MT_COLOR_INDEX_NUMBER);
       snprintf(fmt + colorlen, sizeof(fmt) - colorlen, "%%%sd", prec);
       add_index_color(fmt + colorlen, sizeof(fmt) - colorlen, flags, MT_COLOR_INDEX);
-      snprintf(buf, buflen, fmt, e->msgno + 1);
+      snprintf(buf, buflen, fmt, e->msgno);
       break;
 
     case 'd':
