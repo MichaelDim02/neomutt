@@ -75,8 +75,12 @@ static int menu_config_observer(struct NotifyCallback *nc)
   if (!mutt_str_startswith(ev_c->name, "arrow_") && !mutt_str_startswith(ev_c->name, "menu_"))
     return 0;
 
+  if (mutt_str_equal(ev_c->name, "menu_scroll"))
+    return 0; // This doesn't affect the display
+
   struct Menu *menu = nc->global_data;
-  menu_queue_redraw(menu, MENU_REDRAW_FULL);
+  menu_adjust(menu);
+
   mutt_debug(LL_DEBUG5, "config done, request WA_RECALC, MENU_REDRAW_FULL\n");
   return 0;
 }

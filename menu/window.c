@@ -64,7 +64,7 @@ static int menu_repaint(struct MuttWindow *win)
     menu_redraw_index(menu);
   else if (menu->redraw & MENU_REDRAW_OLD_CUR)
     menu_redraw_motion(menu);
-  else if (menu->redraw == MENU_REDRAW_CURRENT)
+  else if (menu->redraw & MENU_REDRAW_CURRENT)
     menu_redraw_current(menu);
 
   menu->redraw = MENU_REDRAW_NO_FLAGS;
