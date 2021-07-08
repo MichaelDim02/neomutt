@@ -111,6 +111,10 @@ static struct ConfigDef NotmuchVars[] = {
     "(notmuch) Default query type: 'threads' or 'messages'"
   },
   {
+    "nm_query_window_additional_terms", DT_STRING, 0, 0, NULL,
+    "(notmuch) additional notmuch search terms for query windows to match on instead of the date."
+  },
+  {
     "nm_query_window_enable", DT_BOOL, false, 0, NULL,
     "(notmuch) Enable query windows"
   },
