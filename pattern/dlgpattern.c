@@ -109,9 +109,8 @@ static void make_pattern_entry(struct Menu *menu, char *buf, size_t buflen, int 
 
   const char *const c_pattern_format =
       cs_subset_string(NeoMutt->sub, "pattern_format");
-  mutt_expando_format(buf, buflen, 0, menu->win_index->state.cols,
-                      NONULL(c_pattern_format), pattern_format_str,
-                      (intptr_t) entry, MUTT_FORMAT_ARROWCURSOR);
+  mutt_expando_format(buf, buflen, 0, menu->win->state.cols, NONULL(c_pattern_format),
+                      pattern_format_str, (intptr_t) entry, MUTT_FORMAT_ARROWCURSOR);
 }
 
 /**

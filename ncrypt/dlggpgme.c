@@ -1196,9 +1196,8 @@ static void crypt_make_entry(struct Menu *menu, char *buf, size_t buflen, int li
 
   const char *const c_pgp_entry_format =
       cs_subset_string(NeoMutt->sub, "pgp_entry_format");
-  mutt_expando_format(buf, buflen, 0, menu->win_index->state.cols,
-                      NONULL(c_pgp_entry_format), crypt_format_str,
-                      (intptr_t) &entry, MUTT_FORMAT_ARROWCURSOR);
+  mutt_expando_format(buf, buflen, 0, menu->win->state.cols, NONULL(c_pgp_entry_format),
+                      crypt_format_str, (intptr_t) &entry, MUTT_FORMAT_ARROWCURSOR);
 }
 
 /**

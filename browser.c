@@ -955,7 +955,7 @@ static void folder_make_entry(struct Menu *menu, char *buf, size_t buflen, int l
   {
     const char *const c_group_index_format =
         cs_subset_string(NeoMutt->sub, "group_index_format");
-    mutt_expando_format(buf, buflen, 0, menu->win_index->state.cols,
+    mutt_expando_format(buf, buflen, 0, menu->win->state.cols,
                         NONULL(c_group_index_format), group_index_format_str,
                         (intptr_t) &folder, MUTT_FORMAT_ARROWCURSOR);
   }
@@ -964,9 +964,8 @@ static void folder_make_entry(struct Menu *menu, char *buf, size_t buflen, int l
   {
     const char *const c_folder_format =
         cs_subset_string(NeoMutt->sub, "folder_format");
-    mutt_expando_format(buf, buflen, 0, menu->win_index->state.cols,
-                        NONULL(c_folder_format), folder_format_str,
-                        (intptr_t) &folder, MUTT_FORMAT_ARROWCURSOR);
+    mutt_expando_format(buf, buflen, 0, menu->win->state.cols, NONULL(c_folder_format),
+                        folder_format_str, (intptr_t) &folder, MUTT_FORMAT_ARROWCURSOR);
   }
 }
 
@@ -2033,7 +2032,7 @@ void mutt_buffer_select_file(struct Buffer *file, SelectFileFlags flags,
           struct Body *b = mutt_make_file_attach(buf2, NeoMutt->sub);
           if (b)
           {
-            mutt_view_attachment(NULL, b, MUTT_VA_REGULAR, NULL, NULL, menu->win_index);
+            mutt_view_attachment(NULL, b, MUTT_VA_REGULAR, NULL, NULL, menu->win);
             mutt_body_free(&b);
             menu_queue_redraw(menu, MENU_REDRAW_FULL);
           }
